@@ -1,22 +1,40 @@
-import * as React from 'react';
-import toast from "react-hot-toast";
+import React, {ReactNode, useCallback} from "react";
 import {jwtDecode} from "jwt-decode";
+import {PluginError, PluginErrors} from "../utils/plugin-error";
 
 let loginDialog;
 
-export const ApiTokenContext = React.createContext<string | null>(null);
-
-export const useApiToken = () => {
-    return React.useContext(ApiTokenContext);
+interface AuthContextType {
+    apiToken: string | null;
 }
 
-export const configureAuth = () => {
+const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider :React.FC<{children: ReactNode}> = ({children}) => {
+    const apiToken = configureAuth();
+
+    return (
+        <AuthContext.Provider value={{apiToken}}>
+            {children}
+        </AuthContext.Provider>
+    )
+}
+
+export const useAuth = () => {
+    const context = React.useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error('useAuth must be used within a AuthProvider');
+    }
+    return context;
+}
+
+const configureAuth = () => {
     const [apiToken, setApiToken] = React.useState<string | null>(null);
 
     const processLoginMessage = (arg) => {
         // Confirm origin is correct.
         if (arg.origin !== window.location.origin) {
-            throw new Error("Incorrect origin passed to processLoginMessage.");
+            throw new PluginError(PluginErrors.LoginFailed);
         }
 
         let messageFromDialog = JSON.parse(arg.message);
@@ -24,7 +42,7 @@ export const configureAuth = () => {
             localStorage.setItem('apiToken', messageFromDialog.token);
             setApiToken(messageFromDialog.token)
         } else {
-            toast.error("An error occurred while logging in.")
+            throw new PluginError(PluginErrors.LoginFailed);
         }
 
         loginDialog.close();
@@ -39,7 +57,6 @@ export const configureAuth = () => {
             }
 
             if (!apiToken) {
-                console.log("Triggering login popup");
                 // Trigger the login popup
                 const fullUrl = window.location.origin + '/login.html'; // Ensure correct URL
 
@@ -51,7 +68,9 @@ export const configureAuth = () => {
             }
         };
 
-        checkAuthAndTriggerLogin().catch(() => toast.error("An error occurred while checking authentication."));
+        checkAuthAndTriggerLogin().catch(() => {
+            throw new PluginError(PluginErrors.LoginFailed)
+        });
     }, []);
 
     return apiToken;

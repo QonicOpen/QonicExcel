@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Show error frame */
+iframe
+{
+    display: none;
+}
+
+.architecture {
+    @apply bg-slate-200/[0.25];
+}
+
+.hvac {
+    @apply bg-red-200/[0.25];
+}
+
+.structural {
+    @apply bg-sky-200/[0.25];
+}
+
+.mep {
+    @apply bg-green-200/[0.25];
+}
+
+.construction {
+    @apply bg-purple-200/[0.25];
+}
+
+.other {
+    @apply bg-gray-100/[0.25];
+}

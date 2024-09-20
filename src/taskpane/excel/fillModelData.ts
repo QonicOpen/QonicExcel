@@ -1,28 +1,62 @@
-import toast from "react-hot-toast";
+import {ModelData} from "../utils/types";
+import {getColumnLetter} from "./utils";
 
-export async function fillModelData(data: Record<string, string>[])
+export async function fillModelData(data: ModelData): Promise<void>
 {
-    await Excel.run(async function (context) {
+    return Excel.run(async function (context) {
         const sheet = context.workbook.worksheets.getActiveWorksheet();
+        sheet.protection.unprotect();
 
         const usedRange = sheet.getUsedRange();
-        usedRange.load(["rowCount", "columnCount"]);
-        await context.sync()
+        usedRange.clear(Excel.ClearApplyTo.contents);
 
-        const lastUsedColumn = usedRange.columnCount + 4;
-        const firstColumn = "D";
-        const clearRange = sheet.getRange(`${firstColumn}1:${String.fromCharCode(64 + lastUsedColumn)}${usedRange.rowCount}`);
-        clearRange.clear(Excel.ClearApplyTo.contents);
+        if(data.records.length === 0) {
+            await context.sync();
+            return;
+        }
 
-        const properties = Array.from(new Set(data.flatMap(item => Object.keys(item))))
-        const lastColumn = String.fromCharCode(68 + properties.length - 1);
-        const headerRange = sheet.getRange(`${firstColumn}1:${lastColumn}1`);
+        const lastColumn = getColumnLetter(Object.keys(data.records[0]).length - 1);
+        const lastRow = data.records.length + 1;
+        const headerAddress = `A1:${lastColumn}1`;
+        const dataAddress = `A2:${lastColumn}${lastRow}`;
+
+        // Update headers
+        const properties = Array.from(new Set(data.records.flatMap(item => Object.keys(item))))
+        const headerRange = sheet.getRange(headerAddress);
         headerRange.values = [properties];
-        headerRange.format.font.bold = true; // Make headers bold
-        const rows = data.map(item => properties.map(prop => item[prop as string] || ""));
-        const dataRange = sheet.getRange(`${firstColumn}2:${lastColumn}${data.length + 1}`);
+        headerRange.format.font.bold = true;
+
+        // Update data
+        const rows = data.records.map(item => properties.map(prop => item[prop] as string));
+        const dataRange = sheet.getRange(dataAddress);
         dataRange.values = rows;
-        sheet.getRange(`${firstColumn}:${lastColumn}`).format.autofitColumns()
+        dataRange.numberFormat = rows.map(row =>
+            row.map(_ => '@') // Treat all values as text
+        );
+
+        sheet.getRange(`A:${lastColumn}`).format.autofitColumns()
         await context.sync();
-    });
+
+        sheet.freezePanes.freezeRows(1); // Make the header row sticky
+        sheet.protection.protect({
+            allowAutoFilter: true,
+            allowFormatCells: true,
+            allowFormatColumns: true,
+            allowFormatRows: true,
+            allowPivotTables: true,
+            allowSort: true
+        });
+
+        sheet.getRange().format.protection.locked = true; // Lock everything by default
+        const guidColumnIndex = properties.indexOf("Guid");
+        const classColumnIndex = properties.indexOf("Class");
+        for (let i = 0; i < properties.length; i++) {
+            const isLocked = i === guidColumnIndex || i === classColumnIndex;
+            const columnLetter = getColumnLetter(i);
+            if (!isLocked) sheet.getRange(`${columnLetter}2:${columnLetter}${lastRow}`).format.protection.locked = false;
+        }
+
+        await context.sync();
+    })
 }
+

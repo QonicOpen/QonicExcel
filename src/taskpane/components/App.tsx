@@ -1,28 +1,27 @@
 import * as React from "react";
-import Header from "./Header";
-import {ModelSelector} from "./ModelSelector";
-import {ApiTokenContext, configureAuth} from "../utils/auth";
-import {ModelDataQuery} from "./ModelDataQuery";
-import {Toaster} from 'react-hot-toast';
-import {ModelProvider} from "../utils/models";
+import {AuthProvider} from "../providers/AuthProvider";
+import StepComponent from "./StepComponent";
+import {WorksheetProvider} from "../providers/WorksheetProvider";
+import {Welcome} from "./steps/Welcome";
+import {ErrorBoundary} from "react-error-boundary";
+import {Fallback} from "./elements/Fallback";
 
 
 const App: React.FC = () => {
-    const apiToken = configureAuth()
+    const [showWelcome, setShowWelcome] = React.useState<boolean>(true);
 
     return (
-        <ApiTokenContext.Provider value={apiToken}>
-            <ModelProvider>
-                <div className="h-screen">
-                    <Toaster position="top-center" reverseOrder={false}/>
-                    <Header/>
-                    <div className="flex flex-col">
-                        <ModelSelector/>
-                        <ModelDataQuery/>
+        <WorksheetProvider>
+            <AuthProvider>
+                <ErrorBoundary FallbackComponent={Fallback}>
+                    <div className="min-h-screen">
+                        {showWelcome
+                            ? <Welcome onGetStarted={() => setShowWelcome(false)}/>
+                            : <StepComponent/>}
                     </div>
-                </div>
-            </ModelProvider>
-        </ApiTokenContext.Provider>
+                </ErrorBoundary>
+            </AuthProvider>
+        </WorksheetProvider>
     );
 };
 

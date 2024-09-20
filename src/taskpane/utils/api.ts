@@ -1,101 +1,71 @@
-import {useQuery} from "@tanstack/react-query";
-import {useApiToken} from "./auth";
-import {useSelectedModel} from "./models";
+import {useMutation, useQuery} from "@tanstack/react-query";
+import {Model, ModelData, ModelModificationErrors, ModelModifications, Project} from "./types";
+import {PluginError, PluginErrors} from "./plugin-error";
+import {useAuth} from "../providers/AuthProvider";
+import {useWorksheetContext} from "../providers/WorksheetProvider";
 
 const baseUrl = 'https://develop-public-api.qonic.com/v1';
 
-export const useModels = () => {
-    const showModelsUrl = `${baseUrl}/models`;
-    const headers = useHeaders();
-    return useQuery({
-        queryKey: ['models'],
-        queryFn: () => fetch(showModelsUrl, {headers})
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json()
-            })
-            .then((json) => json['models']),
-        enabled: !!headers
+export const useProjects = () => useApiQuery<Project[]>({
+    queryKey: ['projects'],
+    queryUrl: `projects`,
+    errorType: PluginErrors.LoadProjectsFailed,
+    formatJson: (response) => response.projects
+})
+
+export const useModels = (projectId: string) => useApiQuery<Model[]>({
+    queryKey: ['models', projectId],
+    queryUrl: `projects/${projectId}/models`,
+    errorType: PluginErrors.LoadModelsFailed,
+    isEnabled: !!projectId,
+    formatJson: (response) => response.models
+})
+
+export const useModelFilters = (projectId: string, modelId: string, isEnabled: boolean) => useApiQuery<string[]>({
+    queryKey: ['modelFilters', projectId, modelId],
+    queryUrl: `projects/${projectId}/models/${modelId}/external-query-available-data`,
+    errorType: PluginErrors.LoadPropertiesFailed,
+    isEnabled: !!projectId && !!modelId && isEnabled,
+    formatJson: (response) => response.fields.filter((field: string) => field !== 'Guid')
+})
+
+export const useModelData = (projectId: string, modelId: string, includeFields: string[], includeFilters: Record<string, string>, isEnabled: boolean) => {
+    const queryUrl = `projects/${projectId}/models/${modelId}/external-query${getModelQuery(includeFields, includeFilters)}`;
+
+    return useApiQuery<ModelData>({
+        queryKey: ['modelData', queryUrl],
+        queryUrl: queryUrl,
+        errorType: PluginErrors.ImportDataFailed,
+        isEnabled: !!projectId && !!modelId && isEnabled,
+        formatJson: (response) => ({records: response.result.map((record) => ({...record}))})
     })
 }
 
-export const useAvailableData = () => {
-    const headers = useHeaders();
-    const {modelId, projectId} = useSelectedModel();
-    return useQuery({
-        queryKey: ['availableData', projectId, modelId],
-        queryFn: () => fetch(`${baseUrl}/projects/${projectId}/models/${modelId}/external-query-available-data`, {headers})
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json()
-            })
-            .then((json) => json.fields),
-        enabled: !!headers && !!projectId && !!modelId,
-    })
-}
+export const useSaveModelDataMutation = (projectId: string, modelId: string) => useApiMutation<ModelModifications, ModelModificationErrors>({
+    mutationUrl: `projects/${projectId}/models/${modelId}/external-data-modification`,
+    errorType: PluginErrors.SaveDataFailed
+})
 
-export const useModelDataQuery = () => {
-    const {modelId, projectId} = useSelectedModel();
-    const headers = useHeaders();
-    const queryUrl = `${baseUrl}/projects/${projectId}/models/${modelId}/external-query`;
-    return (query: string) => fetch(`${queryUrl}?${query}`, {headers})
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json()
-        })
-        .then((json) => json.result)
-}
+const getModelQuery = (includeFields: string[], includeFilters: Record<string, string>) => {
+    let query = "?";
 
-export const useUpdateModelData = () => {
-    const {modelId, projectId} = useSelectedModel();
-    const headers = useHeaders();
-    const updateUrl = `${baseUrl}/projects/${projectId}/models/${modelId}/external-data-modification`;
-    return (oldData: Record<string, string>[], newData: Record<string, string>[]): Promise<Response | null> => {
-        const updatedModelData = getUpdatedModelData(oldData, newData);
-        if (Object.keys(updatedModelData).length === 0) return Promise.resolve(null);
+    if (includeFields.length > 0) {
+        query += "fields=" + includeFields.join("&fields=");
 
-        return fetch(updateUrl, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(updatedModelData)
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response;
-            });
-    }
-}
-
-const getUpdatedModelData = (oldData: Record<string, string>[], newData: Record<string, string>[]) => {
-    const changes = {} as Record<string, Record<string, string>>
-    for (const newRow of newData) {
-        const oldRow = oldData.find(row => row.Guid === newRow.Guid);
-        if (!oldRow) continue;
-
-        const rowId = newRow.Guid;
-        for (const [field, value] of Object.entries(newRow)) {
-            if (field === 'Guid') continue;
-            if (!oldRow[field] && !value) continue;
-            const newValue = !!value ? value : null;
-            if (oldRow[field] !== newValue) {
-                changes[field] = {...changes[field], [rowId]: newValue}
-            }
-        }
+        if (includeFields.length > 0) query += "&";
     }
 
-    return {Values: changes}
+
+    for (const [key, value] of Object.entries(includeFilters)) {
+        query += `filters[${encodeURIComponent(key)}]=${encodeURIComponent(value)}&`;
+    }
+
+    return query
 }
+
 
 const useHeaders = () => {
-    const apiToken = useApiToken()
+    const {apiToken} = useAuth()
     if (!apiToken) return null;
 
     return {
@@ -104,3 +74,76 @@ const useHeaders = () => {
     }
 }
 
+interface ApiQueryOptions<T> {
+    queryKey: string[];
+    queryUrl: string;
+    errorType: PluginErrors;
+    isEnabled?: boolean;
+    formatJson?: (json: any) => T;
+}
+
+export const useApiQuery = <T>({
+                                   queryKey,
+                                   queryUrl,
+                                   errorType,
+                                   isEnabled = true,
+                                   formatJson = null
+                               }: ApiQueryOptions<T>) => {
+    const headers = useHeaders();
+    const {updateWorksheetState} = useWorksheetContext();
+
+    return useQuery({
+        queryKey,
+        queryFn: async () => {
+            try {
+                const response = await fetch(`${baseUrl}/${queryUrl}`, {headers});
+                if (!response.ok) throw new Error(`Error ${response.status}: request failed`);
+
+                const jsonData = await response.json();
+                return formatJson ? formatJson(jsonData) : jsonData;
+            } catch (error: any) {
+                console.error(error)
+                updateWorksheetState({error: new PluginError(errorType, error.message)});
+                return null
+            }
+        },
+        retry: 0,
+        enabled: !!headers && isEnabled
+    });
+};
+
+interface ApiMutationOptions<ResponseType> {
+    mutationUrl: string;
+    method?: string;
+    errorType: PluginErrors;
+    formatJson?: (json: any) => ResponseType;
+}
+
+export const useApiMutation = <InputType, ResponseType>({
+                                                            mutationUrl,
+                                                            method = 'POST',
+                                                            errorType,
+                                                            formatJson
+                                                        }: ApiMutationOptions<ResponseType>) => {
+    const headers = useHeaders();
+    const {updateWorksheetState} = useWorksheetContext();
+
+    return useMutation({
+        mutationFn: async (variables: InputType) => {
+            try {
+                const response = await fetch(`${baseUrl}/${mutationUrl}`, {
+                    method,
+                    headers: {...headers, 'Content-Type': 'application/json',},
+                    body: JSON.stringify(variables),
+                });
+                if (!response.ok) throw new Error(`Error ${response.status}: request failed`);
+
+                const jsonData = await response.json();
+                return formatJson ? formatJson(jsonData) : jsonData;
+
+            } catch (error: any) {
+                updateWorksheetState({error: new PluginError(errorType, error.message)});
+            }
+        }
+    });
+};
