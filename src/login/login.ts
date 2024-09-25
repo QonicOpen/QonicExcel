@@ -5,7 +5,7 @@ Office.onReady(async () => {
         domain: 'develop-qonic.eu.auth0.com',
         clientId: 'xETlXGmqz1KH2ANvkasuS2HjQhpcdZBe',
         authorizationParams: {
-            audience: 'https://develop-public-api.qonic.com',
+            audience: 'https://develop-api.qonic.com',
             scope: 'openid profile email',
             redirect_uri:  `${window.location.origin}/login.html`
         }

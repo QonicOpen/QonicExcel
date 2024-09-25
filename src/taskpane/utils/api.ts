@@ -4,7 +4,7 @@ import {PluginError, PluginErrors} from "./plugin-error";
 import {useAuth} from "../providers/AuthProvider";
 import {useWorksheetContext} from "../providers/WorksheetProvider";
 
-const baseUrl = 'https://develop-public-api.qonic.com/v1';
+const baseUrl = 'https://develop-api.qonic.com/v1';
 
 export const useProjects = () => useApiQuery<Project[]>({
     queryKey: ['projects'],
