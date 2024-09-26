@@ -1,11 +1,11 @@
 import React, {createContext, useContext, useState, ReactNode, useEffect, useCallback} from "react";
 import {onSheetChanged, removeOnSheetChanged} from "../excel/onSheetChanged";
-import {Steps} from "../utils/steps";
+import {Step, Steps} from "../utils/steps";
 import {PluginError} from "../utils/plugin-error";
 import {CellError} from "../utils/types";
 
 export interface WorksheetState {
-    currentStep: string;
+    currentStep: Step;
     selectedModel: { projectId: string, modelId: string };
     filterSearchTerm: string;
     selectedFilters: string[];

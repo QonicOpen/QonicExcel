@@ -4,7 +4,7 @@ import {SetFilterValues} from "./steps/SetFilterValues";
 import {UtilizeData} from "./steps/UtilizeData";
 import React, {useEffect} from "react";
 import {useModelFilters, useModelData} from "../utils/api";
-import {previousStep, stepProgress, stepIndex, Steps, stepTitle, totalSteps, nextStep} from "../utils/steps";
+import {previousStep, stepProgress, stepIndex, Steps, stepTitle, totalSteps} from "../utils/steps";
 import StepIndicator from "./elements/StepIndicator";
 import {LoadDataFilters} from "./steps/LoadDataFilters";
 import {LoadQueryData} from "./steps/LoadQueryData";
@@ -12,6 +12,7 @@ import {fillModelData} from "../excel/fillModelData";
 import {useWorksheetContext} from "../providers/WorksheetProvider";
 import {Fallback} from "./elements/Fallback";
 import {PluginError, PluginErrors} from "../utils/plugin-error";
+import {NoFilterResults} from "./steps/NoFilterResults";
 
 
 const StepComponent: React.FC = () => {
@@ -28,6 +29,12 @@ const StepComponent: React.FC = () => {
 
     useEffect(() => {
         if (!!modelQueryData && currentStep === Steps.LOAD_QUERY_DATA) {
+            console.log(modelQueryData.records)
+            if (modelQueryData.records.length === 0) {
+                updateWorksheetState({currentStep: Steps.NO_FILTER_RESULTS});
+                return;
+            }
+
             fillModelData(modelQueryData)
                 .then(() => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false}))
                 .catch((error) => updateWorksheetState({error: new PluginError(PluginErrors.ImportDataFailed, error.message)}))
@@ -46,6 +53,8 @@ const StepComponent: React.FC = () => {
                 return <SetFilterValues/>;
             case Steps.LOAD_QUERY_DATA:
                 return <LoadQueryData/>;
+            case Steps.NO_FILTER_RESULTS:
+                return <NoFilterResults/>
             case Steps.UTILIZE_DATA:
                 return <UtilizeData modelQueryData={modelQueryData}/>;
             default:

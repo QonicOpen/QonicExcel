@@ -2,6 +2,7 @@ import React, {useCallback} from "react";
 import {ButtonOverlay} from "../elements/ButtonOverlay";
 import {XMarkIcon} from "@heroicons/react/24/outline";
 import {useWorksheetContext} from "../../providers/WorksheetProvider";
+import {Steps} from "../../utils/steps";
 
 export const SetFilterValues = () => {
     const { activeWorkSheet: { selectedFilters, selectedFilterValues }, updateWorksheetState } = useWorksheetContext();
@@ -11,7 +12,7 @@ export const SetFilterValues = () => {
     }, [selectedFilterValues, updateWorksheetState]);
 
     const onChooseFilterValues = useCallback(() => {
-        updateWorksheetState({currentStep: 'LOAD_QUERY_DATA'});
+        updateWorksheetState({currentStep: Steps.LOAD_QUERY_DATA});
     }, [updateWorksheetState]);
 
     return (
