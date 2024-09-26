@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect} from 'react';
 import ProjectDropdown from "../elements/ProjectDropdown";
-import {Project} from "../../utils/types";
+import {Model, Project} from "../../utils/types";
 import {useModels, useProjects} from "../../utils/api";
 import {ModelList} from "../elements/ModelList";
 import StepIndicator from "../elements/StepIndicator";
@@ -18,8 +18,8 @@ export const SelectModel = () => {
         updateWorksheetState({currentStep: Steps.LOAD_DATA_FILTERS});
     }, [updateWorksheetState]);
 
-    const onChangeModel = useCallback((projectId: string, modelId: string) => {
-        updateWorksheetState({selectedModel: {projectId, modelId}});
+    const onChangeModel = useCallback((projectId: string, modelId: string, name: string) => {
+        updateWorksheetState({selectedModel: {projectId, modelId, name }});
     }, [updateWorksheetState]);
 
 
@@ -27,7 +27,7 @@ export const SelectModel = () => {
         <div className="mt-5">
             <div className="mb-4">
                 <h2 className="font-semibold mb-2">Select project</h2>
-                <ProjectDropdown isLoadingProjects={isLoadingProjects} projects={projects} onSelectProject={(projectId) => onChangeModel(projectId, undefined)} projectId={projectId}/>
+                <ProjectDropdown isLoadingProjects={isLoadingProjects} projects={projects} onSelectProject={(projectId) => onChangeModel(projectId, undefined, undefined)} projectId={projectId}/>
             </div>
 
             <div>
@@ -35,7 +35,7 @@ export const SelectModel = () => {
                 {!projectId ? (
                     <NoProjectSelected/>
                 ) : (
-                    <ModelList isLoadingModels={isLoadingModels} models={models ?? []} onChange={(modelId) => onChangeModel(projectId, modelId)} modelId={modelId}/>
+                    <ModelList isLoadingModels={isLoadingModels} models={models ?? []} onChange={(model) => onChangeModel(projectId, model.id, model.name)} modelId={modelId}/>
                 )}
             </div>
 

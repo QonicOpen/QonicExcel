@@ -8,7 +8,7 @@ import {ExclamationTriangleIcon} from "@heroicons/react/24/outline";
 interface ModelListProps {
     isLoadingModels: boolean;
     models: Model[];
-    onChange: (modelId: string) => void;
+    onChange: (model: Model) => void;
     modelId: string;
 }
 
@@ -29,7 +29,7 @@ export const ModelList: React.FC<ModelListProps> = ({isLoadingModels, models, on
             {models.map((model) => (
                 <div
                     key={model.id}
-                    onClick={() => onChange(model.id)}
+                    onClick={() => onChange(model)}
                     className={classNames("h-16 flex items-center cursor-pointer rounded-sm p-2",
                         model.id === modelId ? "outline outline-2 outline-primary-500" : " border border-gray-300 hover:outline hover:outline-2 hover:outline-gray-300"
                     )}

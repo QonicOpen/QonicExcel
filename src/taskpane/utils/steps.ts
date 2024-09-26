@@ -12,6 +12,7 @@ export const Steps = {
     LOAD_QUERY_DATA: {id: 'LOAD_QUERY_DATA', stepNumber: 3},
     NO_FILTER_RESULTS: {id: 'NO_FILTER_DATA', stepNumber: 3, title: 'Filter Data'},
     UTILIZE_DATA: {id: 'UTILIZE_DATA', stepNumber: 4, title: 'Review data'},
+    EDITING_ACCESS_DENIED: {id: 'EDITING_ACCESS_DENIED', stepNumber: 4, title: 'Review data'},
 }
 
 export const OrderedSteps: Step[] = [
@@ -30,6 +31,5 @@ export const stepIndex = (currentStep: Step) => OrderedSteps.findIndex(step => s
 export const totalSteps = 4;
 
 export const previousStep = (currentStep: Step): Step => {
-    if (currentStep == Steps.NO_FILTER_RESULTS) return Steps.SET_FILTER_VALUES;
-    return OrderedSteps.find(step => step.stepNumber === OrderedSteps[currentStep.stepNumber].stepNumber - 1);
+    return OrderedSteps.find(step => step.stepNumber === currentStep.stepNumber - 1);
 }

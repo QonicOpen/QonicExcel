@@ -13,6 +13,7 @@ import {useWorksheetContext} from "../providers/WorksheetProvider";
 import {Fallback} from "./elements/Fallback";
 import {PluginError, PluginErrors} from "../utils/plugin-error";
 import {NoFilterResults} from "./steps/NoFilterResults";
+import {EditingAccessDenied} from "./steps/EditingAccessDenied";
 
 
 const StepComponent: React.FC = () => {
@@ -57,6 +58,8 @@ const StepComponent: React.FC = () => {
                 return <NoFilterResults/>
             case Steps.UTILIZE_DATA:
                 return <UtilizeData modelQueryData={modelQueryData}/>;
+            case Steps.EDITING_ACCESS_DENIED:
+                return <EditingAccessDenied/>
             default:
                 return <></>
         }

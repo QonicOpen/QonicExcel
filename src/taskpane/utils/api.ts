@@ -3,6 +3,7 @@ import {Model, ModelData, ModelModificationErrors, ModelModifications, Project} 
 import {PluginError, PluginErrors} from "./plugin-error";
 import {useAuth} from "../providers/AuthProvider";
 import {useWorksheetContext} from "../providers/WorksheetProvider";
+import {Steps} from "./steps";
 
 const baseUrl = 'https://develop-api.qonic.com/v1';
 
@@ -57,6 +58,7 @@ const getModelQuery = (includeFields: string[], includeFilters: Record<string, s
 
 
     for (const [key, value] of Object.entries(includeFilters)) {
+        if(!value) continue;
         query += `filters[${encodeURIComponent(key)}]=${encodeURIComponent(value)}&`;
     }
 
@@ -130,8 +132,10 @@ export const useApiMutation = <InputType, ResponseType>({
 
     return useMutation({
         mutationFn: async (variables: InputType) => {
+            let response: Response;
+
             try {
-                const response = await fetch(`${baseUrl}/${mutationUrl}`, {
+                response = await fetch(`${baseUrl}/${mutationUrl}`, {
                     method,
                     headers: {...headers, 'Content-Type': 'application/json',},
                     body: JSON.stringify(variables),
@@ -142,7 +146,8 @@ export const useApiMutation = <InputType, ResponseType>({
                 return formatJson ? formatJson(jsonData) : jsonData;
 
             } catch (error: any) {
-                updateWorksheetState({error: new PluginError(errorType, error.message)});
+                if (response.status === 403) updateWorksheetState({currentStep: Steps.EDITING_ACCESS_DENIED});
+                else updateWorksheetState({error: new PluginError(errorType, error.message)});
             }
         }
     });

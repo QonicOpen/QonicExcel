@@ -8,6 +8,8 @@ import {ButtonOverlay} from "../elements/ButtonOverlay";
 import {getCellErrors} from "../../excel/getCellErrors";
 import {ExclamationTriangleIcon} from "@heroicons/react/24/outline";
 import {CellErrorList} from "../elements/CellErrorList";
+import toast from "react-hot-toast";
+import {CheckCircleIcon} from "@heroicons/react/24/solid";
 
 interface UtilizeDataProps {
     modelQueryData: ModelData;
@@ -34,10 +36,18 @@ export const UtilizeData: React.FC<UtilizeDataProps> = ({modelQueryData}: Utiliz
                     const cellErrors = await getCellErrors(modificationErrors.errors)
                         .then((cellErrors) => modificationErrors.errors.length === cellErrors.length ? cellErrors : [])
                         .catch(() => []);
-
                     updateWorksheetState({cellErrors, hasCellErrors: true});
-
                 } else {
+                    toast(() => (
+                        <div>
+                            <CheckCircleIcon className="size-5 text-primary-500"/>
+                            <div className="flex items-center">
+                                <h1>Changes pushed</h1>
+                                <p>Changes successfully pushed to <em>{selectedModel.name}</em></p>
+                            </div>
+                        </div>
+                    ));
+
                     updateWorksheetState({cellErrors: [], hasCellErrors: false});
                 }
             })

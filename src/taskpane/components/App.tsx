@@ -5,6 +5,7 @@ import {WorksheetProvider} from "../providers/WorksheetProvider";
 import {Welcome} from "./steps/Welcome";
 import {ErrorBoundary} from "react-error-boundary";
 import {Fallback} from "./elements/Fallback";
+import {Toaster} from "react-hot-toast";
 
 
 const App: React.FC = () => {
@@ -14,6 +15,7 @@ const App: React.FC = () => {
         <WorksheetProvider>
             <AuthProvider>
                 <ErrorBoundary FallbackComponent={Fallback}>
+                    <div><Toaster/></div>
                     <div className="min-h-screen">
                         {showWelcome
                             ? <Welcome onGetStarted={() => setShowWelcome(false)}/>

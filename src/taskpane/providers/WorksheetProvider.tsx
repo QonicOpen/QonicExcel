@@ -6,7 +6,7 @@ import {CellError} from "../utils/types";
 
 export interface WorksheetState {
     currentStep: Step;
-    selectedModel: { projectId: string, modelId: string };
+    selectedModel: { projectId: string, modelId: string, name: string };
     filterSearchTerm: string;
     selectedFilters: string[];
     selectedFilterValues: { [key: string]: string };
@@ -17,7 +17,7 @@ export interface WorksheetState {
 
 const emptyWorksheetState: WorksheetState = {
     currentStep: Steps.SELECT_MODEL,
-    selectedModel: { projectId: "", modelId: "" },
+    selectedModel: { projectId: "", modelId: "", name: "" },
     filterSearchTerm: "",
     selectedFilters: [],
     selectedFilterValues: {},
