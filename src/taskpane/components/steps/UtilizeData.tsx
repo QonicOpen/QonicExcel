@@ -6,7 +6,7 @@ import {getModelModifications} from "../../excel/getModelModifications";
 import {PluginError, PluginErrors} from "../../utils/plugin-error";
 import {ButtonOverlay} from "../elements/ButtonOverlay";
 import {getCellErrors} from "../../excel/getCellErrors";
-import {ExclamationTriangleIcon} from "@heroicons/react/24/outline";
+import {ExclamationTriangleIcon, XMarkIcon} from "@heroicons/react/24/outline";
 import {CellErrorList} from "../elements/CellErrorList";
 import toast from "react-hot-toast";
 import {CheckCircleIcon} from "@heroicons/react/24/solid";
@@ -38,13 +38,14 @@ export const UtilizeData: React.FC<UtilizeDataProps> = ({modelQueryData}: Utiliz
                         .catch(() => []);
                     updateWorksheetState({cellErrors, hasCellErrors: true});
                 } else {
-                    toast(() => (
-                        <div>
-                            <CheckCircleIcon className="size-5 text-primary-500"/>
-                            <div className="flex items-center">
-                                <h1>Changes pushed</h1>
-                                <p>Changes successfully pushed to <em>{selectedModel.name}</em></p>
+                    toast((t) => (
+                        <div className="flex flex-row items-center">
+                            <CheckCircleIcon className="min-w-6 min-h-5 text-primary-500 mr-4"/>
+                            <div>
+                                <h1 className="font-bold mb-1">Changes pushed</h1>
+                                <p>Changes successfully pushed to <span className="font-bold">{name}</span></p>
                             </div>
+                            <XMarkIcon className="min-w-5 min-h-5 text-qonic-gray-400 ml-5 cursor-pointer" onClick={() => toast.dismiss(t.id)}/>
                         </div>
                     ));
 
