@@ -26,7 +26,7 @@ export const useModelFilters = (projectId: string, modelId: string, isEnabled: b
     queryUrl: `projects/${projectId}/models/${modelId}/external-query-available-data`,
     errorType: PluginErrors.LoadPropertiesFailed,
     isEnabled: !!projectId && !!modelId && isEnabled,
-    formatJson: (response) => response.fields.filter((field: string) => field !== 'Guid')
+    formatJson: (response) => response.fields
 })
 
 export const useModelData = (projectId: string, modelId: string, includeFields: string[], includeFilters: Record<string, string>, isEnabled: boolean) => {

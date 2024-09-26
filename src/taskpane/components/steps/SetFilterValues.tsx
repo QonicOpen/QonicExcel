@@ -3,6 +3,7 @@ import {ButtonOverlay} from "../elements/ButtonOverlay";
 import {XMarkIcon} from "@heroicons/react/24/outline";
 import {useWorksheetContext} from "../../providers/WorksheetProvider";
 import {Steps} from "../../utils/steps";
+import classNames from "../../utils/class-names";
 
 export const SetFilterValues = () => {
     const { activeWorkSheet: { selectedFilters, selectedFilterValues }, updateWorksheetState } = useWorksheetContext();
@@ -17,9 +18,9 @@ export const SetFilterValues = () => {
 
     return (
         <div className="mt-2">
-            <p className="mb-4 text-qonic-gray-400">Optionally, you can filter the data you are about to import.</p>
+            <p className="mb-6 text-qonic-gray-400">Optionally, you can filter the data you are about to import.</p>
             {selectedFilters.map((dataFilter) => (
-                <div key={dataFilter} className="border-b border-gray-100 pb-1 mb-3">
+                <div key={dataFilter} className={classNames("border-b border-gray-100 pb-2 mb-3", dataFilter == 'Guid' ? 'pb-5 border-gray-200' : '')}>
                     <label className="font-semibold mb-1">{dataFilter}</label>
                     <div className="flex items-center justify-center w-full bg-white relative">
                         <input
