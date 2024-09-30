@@ -2,11 +2,12 @@ import React, {createContext, useContext, useState, ReactNode, useEffect, useCal
 import {onSheetChanged, removeOnSheetChanged} from "../excel/onSheetChanged";
 import {Step, Steps} from "../utils/steps";
 import {PluginError} from "../utils/plugin-error";
-import {CellError} from "../utils/types";
+import {CellError, ModelData} from "../utils/types";
 
 export interface WorksheetState {
     currentStep: Step;
     selectedModel: { projectId: string, modelId: string, name: string };
+    selectedModelData: ModelData;
     filterSearchTerm: string;
     selectedFilters: string[];
     selectedFilterValues: { [key: string]: string };
@@ -18,6 +19,7 @@ export interface WorksheetState {
 const emptyWorksheetState: WorksheetState = {
     currentStep: Steps.SELECT_MODEL,
     selectedModel: { projectId: "", modelId: "", name: "" },
+    selectedModelData: { records: []},
     filterSearchTerm: "",
     selectedFilters: [],
     selectedFilterValues: {},

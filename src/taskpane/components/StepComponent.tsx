@@ -30,14 +30,13 @@ const StepComponent: React.FC = () => {
 
     useEffect(() => {
         if (!!modelQueryData && currentStep === Steps.LOAD_QUERY_DATA) {
-            console.log(modelQueryData.records)
             if (modelQueryData.records.length === 0) {
                 updateWorksheetState({currentStep: Steps.NO_FILTER_RESULTS});
                 return;
             }
 
             fillModelData(modelQueryData)
-                .then(() => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false}))
+                .then(() => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false, selectedModelData: modelQueryData}))
                 .catch((error) => updateWorksheetState({error: new PluginError(PluginErrors.ImportDataFailed, error.message)}))
         }
     }, [updateWorksheetState, modelQueryData, currentStep]);
@@ -57,7 +56,7 @@ const StepComponent: React.FC = () => {
             case Steps.NO_FILTER_RESULTS:
                 return <NoFilterResults/>
             case Steps.UTILIZE_DATA:
-                return <UtilizeData modelQueryData={modelQueryData}/>;
+                return <UtilizeData/>;
             case Steps.EDITING_ACCESS_DENIED:
                 return <EditingAccessDenied/>
             default:

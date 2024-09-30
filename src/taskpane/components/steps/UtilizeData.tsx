@@ -1,8 +1,8 @@
 import React, {useCallback} from "react";
 import {useSaveModelDataMutation} from "../../utils/api";
 import {useWorksheetContext} from "../../providers/WorksheetProvider";
-import {ModelData, ModelModificationErrors} from "../../utils/types";
-import {getModelModifications} from "../../excel/getModelModifications";
+import {ModelModificationErrors} from "../../utils/types";
+import {computeModifications, getUpdatedModelData} from "../../excel/getModelModifications";
 import {PluginError, PluginErrors} from "../../utils/plugin-error";
 import {ButtonOverlay} from "../elements/ButtonOverlay";
 import {getCellErrors} from "../../excel/getCellErrors";
@@ -11,50 +11,72 @@ import {CellErrorList} from "../elements/CellErrorList";
 import toast from "react-hot-toast";
 import {CheckCircleIcon} from "@heroicons/react/24/solid";
 
-interface UtilizeDataProps {
-    modelQueryData: ModelData;
-}
-
-export const UtilizeData: React.FC<UtilizeDataProps> = ({modelQueryData}: UtilizeDataProps) => {
-    const {activeWorkSheet: {selectedModel, cellErrors, hasCellErrors}, updateWorksheetState} = useWorksheetContext();
+export const UtilizeData: React.FC = () => {
+    const {activeWorkSheet: {selectedModel, cellErrors, hasCellErrors, selectedModelData}, updateWorksheetState} = useWorksheetContext();
     const updateDataMutation = useSaveModelDataMutation(selectedModel.projectId, selectedModel.modelId);
     const [isSaving, setIsSaving] = React.useState(false);
 
-    const onSaveChanges = useCallback(() => {
+    const showNoModificationsToast = () => {
+        toast((t) => (
+            <div className="flex flex-row items-center">
+                <ExclamationTriangleIcon className="min-w-6 min-h-5 text-red-500 mr-4"/>
+                <div>
+                    <h1 className="font-bold mb-1">No changes</h1>
+                    <p>No changes were made yet</p>
+                </div>
+                <XMarkIcon className="min-w-5 min-h-5 text-qonic-gray-400 ml-5 cursor-pointer" onClick={() => toast.dismiss(t.id)}/>
+            </div>
+        ));
+    }
+
+    const showSaveSuccessToast = () => {
+        toast((t) => (
+            <div className="flex flex-row items-center">
+                <CheckCircleIcon className="min-w-6 min-h-5 text-primary-500 mr-4"/>
+                <div>
+                    <h1 className="font-bold mb-1">Changes pushed</h1>
+                    <p>Changes successfully pushed to <span className="font-bold">{selectedModel.name}</span></p>
+                </div>
+                <XMarkIcon className="min-w-5 min-h-5 text-qonic-gray-400 ml-5 cursor-pointer" onClick={() => toast.dismiss(t.id)}/>
+            </div>
+        ));
+    }
+
+    const onSaveChanges = useCallback(async () => {
         setIsSaving(true)
-        getModelModifications(modelQueryData)
-            .then(async (modifications) => {
-                const hasModifications = Object.keys(modifications.Values).length > 0;
-                return hasModifications ? updateDataMutation.mutateAsync(modifications) : Promise.resolve({errors: []} as ModelModificationErrors);
-            })
-            .catch((error) => {
-                console.error(error)
-                updateWorksheetState({error: new PluginError(PluginErrors.SaveDataFailed, error.message)})
-            })
-            .then(async (modificationErrors: ModelModificationErrors) => {
-                if (modificationErrors.errors.length > 0) {
-                    const cellErrors = await getCellErrors(modificationErrors.errors)
-                        .then((cellErrors) => modificationErrors.errors.length === cellErrors.length ? cellErrors : [])
-                        .catch(() => []);
-                    updateWorksheetState({cellErrors, hasCellErrors: true});
-                } else {
-                    toast((t) => (
-                        <div className="flex flex-row items-center">
-                            <CheckCircleIcon className="min-w-6 min-h-5 text-primary-500 mr-4"/>
-                            <div>
-                                <h1 className="font-bold mb-1">Changes pushed</h1>
-                                <p>Changes successfully pushed to <span className="font-bold">{name}</span></p>
-                            </div>
-                            <XMarkIcon className="min-w-5 min-h-5 text-qonic-gray-400 ml-5 cursor-pointer" onClick={() => toast.dismiss(t.id)}/>
-                        </div>
-                    ));
+        const updatedModelData = await getUpdatedModelData();
+        const modifications = computeModifications(selectedModelData, updatedModelData);
+        if (Object.keys(modifications.Values).length === 0) {
+            setIsSaving(false)
+            showNoModificationsToast()
+            return;
+        }
 
-                    updateWorksheetState({cellErrors: [], hasCellErrors: false});
-                }
-            })
-            .finally(() => setIsSaving(false))
+        let modelModificationErrors = {errors: []} as ModelModificationErrors;
+        try {
+            modelModificationErrors = await updateDataMutation.mutateAsync(modifications);
+        } catch (error) {
+            console.error(error)
+            setIsSaving(false)
+            updateWorksheetState({error: new PluginError(PluginErrors.SaveDataFailed, error.message)})
+            return;
+        }
 
-    }, []);
+        const hasErrors = modelModificationErrors.errors.length > 0;
+        if(!hasErrors) {
+            showSaveSuccessToast()
+            updateWorksheetState({cellErrors: [], hasCellErrors: false, selectedModelData: updatedModelData});
+        }
+
+        if (hasErrors) {
+            const cellErrors = await getCellErrors(modelModificationErrors.errors)
+                .then((cellErrors) => modelModificationErrors.errors.length === cellErrors.length ? cellErrors : [])
+                .catch(() => []);
+            updateWorksheetState({cellErrors, hasCellErrors: true});
+        }
+
+        setIsSaving(false)
+    }, [updateWorksheetState, selectedModelData]);
 
     if (hasCellErrors) {
         return (

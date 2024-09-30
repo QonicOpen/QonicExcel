@@ -1,10 +1,6 @@
 import {ModelData, ModelModifications} from "../utils/types";
 
-export async function getModelModifications(prevData: ModelData): Promise<ModelModifications> {
-    return getUpdatedModelData().then((newData) => newData ? computeModifications(prevData, newData) : null)
-}
-
-async function getUpdatedModelData(): Promise<ModelData> {
+export async function getUpdatedModelData(): Promise<ModelData> {
     return Excel.run(async function (context): Promise<ModelData> {
         const sheet = context.workbook.worksheets.getActiveWorksheet();
 
@@ -28,7 +24,7 @@ async function getUpdatedModelData(): Promise<ModelData> {
     })
 }
 
-function computeModifications(oldData: ModelData, newData: ModelData): ModelModifications {
+export function computeModifications(oldData: ModelData, newData: ModelData): ModelModifications {
     const changes = {} as Record<string, Record<string, string>>
     const availableFields = Object.keys(oldData.records[0])
 
