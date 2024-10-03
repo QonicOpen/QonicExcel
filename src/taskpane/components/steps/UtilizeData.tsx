@@ -22,7 +22,7 @@ export const UtilizeData: React.FC = () => {
                 <ExclamationTriangleIcon className="min-w-6 min-h-5 text-red-500 mr-4"/>
                 <div>
                     <h1 className="font-bold mb-1">No changes</h1>
-                    <p>No changes were made yet</p>
+                    <p>No changes were made yet.</p>
                 </div>
                 <XMarkIcon className="min-w-5 min-h-5 text-qonic-gray-400 ml-5 cursor-pointer" onClick={() => toast.dismiss(t.id)}/>
             </div>
