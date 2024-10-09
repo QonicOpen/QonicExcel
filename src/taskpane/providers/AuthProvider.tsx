@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     function (result) {
                         loginDialog = result.value;
                         loginDialog.addEventHandler(Office.EventType.DialogMessageReceived, processLoginMessage);
-                    });
+                    })
             }
         };
 

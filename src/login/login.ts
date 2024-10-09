@@ -2,10 +2,10 @@ import {Auth0Client} from "@auth0/auth0-spa-js";
 
 Office.onReady(async () => {
     const auth0 = new Auth0Client({
-        domain: 'develop-qonic.eu.auth0.com',
-        clientId: 'xETlXGmqz1KH2ANvkasuS2HjQhpcdZBe',
+        domain: process.env.AUTH0_DOMAIN,
+        clientId: process.env.AUTH0_CLIENT_ID,
         authorizationParams: {
-            audience: 'https://develop-api.qonic.com',
+            audience: process.env.AUTH0_AUDIENCE,
             scope: 'openid profile email',
             redirect_uri:  `${window.location.origin}/login.html`
         }

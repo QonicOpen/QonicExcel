@@ -5,9 +5,13 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 const path = require("path");
+const {argv} = require("process");
+const dotenv = require("dotenv");
 
 const urlDev = "https://localhost:3000/";
 const urlProd = "https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
+
+
 
 async function getHttpsOptions() {
   const httpsOptions = await devCerts.getHttpsServerOptions();
@@ -16,6 +20,14 @@ async function getHttpsOptions() {
 
 module.exports = async (env, options) => {
   const dev = options.mode === "development";
+  const mode = argv.mode || 'development'; // Get mode from arguments or default to 'development'
+  const envFilePath = path.resolve(__dirname, `config/.env.${mode}`);
+  const envConfig = dotenv.config({ path: envFilePath }).parsed;
+  const envKeys = Object.keys(envConfig).reduce((prev, next) => {
+    prev[`process.env.${next}`] = JSON.stringify(envConfig[next])
+    return prev
+  }, {})
+
   const config = {
     devtool: "source-map",
     entry: {
@@ -68,6 +80,7 @@ module.exports = async (env, options) => {
       ],
     },
     plugins: [
+      new webpack.DefinePlugin(envKeys),
       new CopyWebpackPlugin({
         patterns: [
           {

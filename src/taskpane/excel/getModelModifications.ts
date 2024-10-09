@@ -39,7 +39,6 @@ export function computeModifications(oldData: ModelData, newData: ModelData): Mo
             const newValue = !!value ? value : null;
             if (oldRow[field] !== newValue) {
                 // log old and new value and guid and the types of the values
-                console.log(`Field: ${field}, Old: ${typeof oldRow[field]} ${oldRow[field]}, New: ${typeof newValue} ${newValue}, Guid: ${rowId}`)
                 changes[field] = {...changes[field], [rowId]: newValue}
             }
         }

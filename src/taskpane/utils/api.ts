@@ -7,7 +7,7 @@ import {Steps} from "./steps";
 import {useSessionContext} from "../providers/ModificationSessionProvider";
 import {useCallback} from "react";
 
-const baseUrl = 'https://develop-api.qonic.com/v1';
+const baseUrl = process.env.API_URL;
 
 export const useProjects = () => useApiQuery<Project[]>({
     queryKey: ['projects'],

@@ -12,9 +12,13 @@
     "dev_server_port": 3000
   },
   "scripts": {
+    "dev-server": "webpack serve --mode development",
+    "demo-server": "webpack serve --mode demo",
+    "rc-server": "webpack serve --mode rc",
+    "server": "webpack serve --mode production",
+
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
-    "dev-server": "webpack serve --mode development",
     "lint": "office-addin-lint check",
     "lint:fix": "office-addin-lint fix",
     "prettier": "office-addin-lint prettier",
@@ -35,6 +39,8 @@
     "@tanstack/react-query": "^5.52.1",
     "axios": "^1.7.5",
     "core-js": "^3.36.0",
+    "dotenv": "^16.4.5",
+    "dotenv-webpack": "^8.1.0",
     "es6-promise": "^4.2.8",
     "jwt-decode": "^4.0.0",
     "react": "^18.2.0",

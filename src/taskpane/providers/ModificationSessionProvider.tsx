@@ -61,8 +61,6 @@ export const ModificationSessionProvider = ({children}) => {
         });
     });
 
-    Office.context.ui.closeContainer()
-
     return (
         <ModificationSessionContext.Provider value={{getSession}}>
             {children}
