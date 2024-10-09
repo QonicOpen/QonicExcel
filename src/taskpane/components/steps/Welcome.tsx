@@ -1,11 +1,18 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Button from "../elements/Button";
+import {useAuth} from "../../providers/AuthProvider";
 
 interface WelcomeProps {
     onGetStarted: () => void;
 }
 
 export const Welcome: React.FC<WelcomeProps> = ({onGetStarted}: WelcomeProps) => {
+    const { apiToken, authorize } = useAuth();
+
+    useEffect(() => {
+        if (apiToken) onGetStarted();
+    }, [apiToken]);
+
     return (
         <div className="min-h-screen flex justify-center flex-col px-5 items-center max-w-md text-center">
             <div className="flex justify-center mb-5">
@@ -27,7 +34,7 @@ export const Welcome: React.FC<WelcomeProps> = ({onGetStarted}: WelcomeProps) =>
             <p className="text-sm text-qonic-gray-400">
                 This tool lets you access Qonic's public API and pull data from selected models directly into your spreadsheet.
             </p>
-            <Button className="my-10" onPress={onGetStarted}>
+            <Button className="my-10" onPress={authorize}>
                 Get started
             </Button>
         </div>

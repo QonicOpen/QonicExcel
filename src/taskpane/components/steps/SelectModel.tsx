@@ -1,16 +1,11 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback} from 'react';
 import ProjectDropdown from "../elements/ProjectDropdown";
-import {Model, Project} from "../../utils/types";
 import {useModels, useProjects} from "../../utils/api";
 import {ModelList} from "../elements/ModelList";
-import StepIndicator from "../elements/StepIndicator";
 import {NoProjectSelected} from "../elements/NoProjectSelected";
 import {Steps} from "../../utils/steps";
 import {useWorksheetContext} from "../../providers/WorksheetProvider";
 import {ButtonOverlay} from "../elements/ButtonOverlay";
-import toast from "react-hot-toast";
-import {CheckCircleIcon} from "@heroicons/react/24/solid";
-import {XMarkIcon} from "@heroicons/react/24/outline";
 
 export const SelectModel = () => {
     const {activeWorkSheet: {selectedModel: {projectId, modelId}}, updateWorksheetState} = useWorksheetContext();
@@ -22,8 +17,7 @@ export const SelectModel = () => {
     }, [updateWorksheetState]);
 
     const onChangeModel = useCallback((projectId: string, modelId: string, name: string) => {
-
-        updateWorksheetState({selectedModel: {projectId, modelId, name }});
+        updateWorksheetState({selectedModel: {projectId, modelId, name}});
     }, [updateWorksheetState]);
 
 

@@ -44,4 +44,8 @@ export interface ModelModifications {
     Values: Record<string, Record<string, string>>;
 }
 
-
+export interface ModelProps {
+    projectId: string;
+    modelId: string;
+    sessionId: string;
+}

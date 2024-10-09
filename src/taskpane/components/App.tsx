@@ -6,6 +6,7 @@ import {Welcome} from "./steps/Welcome";
 import {ErrorBoundary} from "react-error-boundary";
 import {Fallback} from "./elements/Fallback";
 import {Toaster} from "react-hot-toast";
+import {ModificationSessionProvider} from "../providers/ModificationSessionProvider";
 
 
 const App: React.FC = () => {
@@ -14,14 +15,16 @@ const App: React.FC = () => {
     return (
         <WorksheetProvider>
             <AuthProvider>
-                <ErrorBoundary FallbackComponent={Fallback}>
-                    <div><Toaster/></div>
-                    <div className="min-h-screen">
-                        {showWelcome
-                            ? <Welcome onGetStarted={() => setShowWelcome(false)}/>
-                            : <StepComponent/>}
-                    </div>
-                </ErrorBoundary>
+                <ModificationSessionProvider>
+                    <ErrorBoundary FallbackComponent={Fallback}>
+                        <div><Toaster/></div>
+                        <div className="min-h-screen">
+                            {showWelcome
+                                ? <Welcome onGetStarted={() => setShowWelcome(false)}/>
+                                : <StepComponent/>}
+                        </div>
+                    </ErrorBoundary>
+                </ModificationSessionProvider>
             </AuthProvider>
         </WorksheetProvider>
     );

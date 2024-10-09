@@ -35,7 +35,8 @@ export const UtilizeData: React.FC = () => {
                 <CheckCircleIcon className="min-w-6 min-h-5 text-primary-500 mr-4"/>
                 <div>
                     <h1 className="font-bold mb-1">Changes pushed</h1>
-                    <p>Changes successfully pushed to <span className="font-bold">{selectedModel.name}</span></p>
+                    <p>Changes successfully pushed to <span className="font-bold">{selectedModel.name}</span>.</p>
+                    <p>Reload your model in Qonic to view changes.</p>
                 </div>
                 <XMarkIcon className="min-w-5 min-h-5 text-qonic-gray-400 ml-5 cursor-pointer" onClick={() => toast.dismiss(t.id)}/>
             </div>
@@ -101,6 +102,7 @@ export const UtilizeData: React.FC = () => {
             <div className="mt-2">
                 <p className="text-qonic-gray-400">Download your data by saving it, make any necessary modifications,
                     and optionally push your changes back to Qonic.</p>
+                <p className="text-qonic-gray-400">Please ensure to close your Excel add-in once you're finished.</p>
             </div>
             <ButtonOverlay variant="secondary" onPress={() => onSaveChanges()} label="Push to Qonic"
                            isDisabled={isSaving} isLoading={isSaving}/>

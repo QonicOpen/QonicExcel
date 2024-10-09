@@ -18,8 +18,8 @@ export interface WorksheetState {
 
 const emptyWorksheetState: WorksheetState = {
     currentStep: Steps.SELECT_MODEL,
-    selectedModel: { projectId: "", modelId: "", name: "" },
-    selectedModelData: { records: []},
+    selectedModel: {projectId: "", modelId: "", name: ""},
+    selectedModelData: {records: []},
     filterSearchTerm: "",
     selectedFilters: [],
     selectedFilterValues: {},
@@ -31,11 +31,12 @@ interface WorksheetContextType {
     activeWorkSheet: WorksheetState | undefined;
     updateWorksheetState: (newState: Partial<WorksheetState>) => void;
     resetWorksheetState: () => void;
+    worksheets: WorksheetState[];
 }
 
 const WorksheetContext = createContext<WorksheetContextType | undefined>(undefined);
 
-export const WorksheetProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const WorksheetProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     const [activeWorksheet, setActiveWorksheet] = useState<string | undefined>(undefined);
     const [worksheetStates, setWorksheetStates] = useState<{ [key: string]: WorksheetState }>({});
 
@@ -58,14 +59,18 @@ export const WorksheetProvider: React.FC<{ children: ReactNode }> = ({ children 
     const updateWorksheetState = useCallback((newState: Partial<WorksheetState>): void => {
         setWorksheetStates(prev => ({
             ...prev,
-            [activeWorksheet]: { ...prev[activeWorksheet] ?? emptyWorksheetState, ...newState }
+            [activeWorksheet]: {...prev[activeWorksheet] ?? emptyWorksheetState, ...newState}
         }));
     }, [activeWorksheet]);
 
     return (
         <WorksheetContext.Provider
-            value={{ activeWorkSheet: (worksheetStates[activeWorksheet] ?? emptyWorksheetState), updateWorksheetState, resetWorksheetState }}
-        >
+            value={{
+                activeWorkSheet: (worksheetStates[activeWorksheet] ?? emptyWorksheetState),
+                updateWorksheetState,
+                resetWorksheetState,
+                worksheets: Object.values(worksheetStates)
+            }}>
             {children}
         </WorksheetContext.Provider>
     );
