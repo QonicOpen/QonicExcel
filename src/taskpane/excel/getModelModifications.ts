@@ -11,10 +11,11 @@ export async function getUpdatedModelData(): Promise<ModelData> {
         const lastColumnIndex = usedRange.columnCount - 1;
         const updatedData = [] as Record<string, string>[];
         for (let row = 1; row < usedRange.values.length; row++) {
-            let record = {} as Record<string, string>;
+            let record = {} as Record<string, any>;
             for (let column = 0; column <= lastColumnIndex; column++) {
                 const fieldName = usedRange.values[0][column]
-                if(!!fieldName) record[fieldName] = usedRange.values[row][column] as string;
+                const fieldValue = usedRange.values[row][column]
+                if(!!fieldValue) record[fieldName] = isJSON(fieldValue) ? JSON.parse(fieldValue) : fieldValue;
             }
 
             updatedData.push(record);
@@ -37,12 +38,19 @@ export function computeModifications(oldData: ModelData, newData: ModelData): Mo
             if (!availableFields.includes(field)) continue;
             if (!oldRow[field] && !value) continue;
             const newValue = !!value ? value : null;
-            if (oldRow[field] !== newValue) {
-                // log old and new value and guid and the types of the values
+            if (JSON.stringify(oldRow[field]) !== JSON.stringify(newValue)) {
                 changes[field] = {...changes[field], [rowId]: newValue}
             }
         }
     }
 
     return {Values: changes}
+}
+
+function isJSON(str) {
+    try {
+        return JSON.parse(str) && !!str;
+    } catch (e) {
+        return false;
+    }
 }

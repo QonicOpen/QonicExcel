@@ -27,7 +27,10 @@ export async function fillModelData(data: ModelData): Promise<void>
         headerRange.format.font.bold = true;
 
         // Update data
-        const rows = data.records.map(item => properties.map(prop => item[prop] as string));
+        const rows = data.records.map(item => properties.map(prop => {
+            return typeof item[prop] === 'object' ? JSON.stringify(item[prop]) : item[prop]
+        }));
+
         const dataRange = sheet.getRange(dataAddress);
         dataRange.values = rows;
         dataRange.numberFormat = rows.map(row =>
