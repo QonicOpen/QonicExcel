@@ -14,6 +14,8 @@ export async function getCellErrors(modificationErrors: ModificationError[]): Pr
         const cellErrors = [] as CellError[];
 
         for (const error of modificationErrors) {
+            const [key, subKey] = error.field.split('.');
+            if (subKey) error.field = `${key}: ${subKey}`;
             const guidColumn = findColumn(usedRange, error.field);
             const fieldRow = findRow(usedRange, error.guid);
             const cellName = `${getColumnLetter(guidColumn)}${fieldRow + 1}`;

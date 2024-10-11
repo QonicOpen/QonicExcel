@@ -1,6 +1,8 @@
 import {ModelData} from "../utils/types";
 import {getColumnLetter} from "./utils";
 
+const lockedColumns = ["Guid", "Class", "MaterialLayerSet", "SpatialLocation: Site", "SpatialLocation: Building", "SpatialLocation: Floor",, "SpatialLocation: Space"]
+
 export async function fillModelData(data: ModelData): Promise<void>
 {
     return Excel.run(async function (context) {
@@ -60,10 +62,9 @@ export async function fillModelData(data: ModelData): Promise<void>
         });
 
         sheet.getRange().format.protection.locked = true; // Lock everything by default
-        const guidColumnIndex = properties.indexOf("Guid");
-        const classColumnIndex = properties.indexOf("Class");
+        const lockedColumnIndices = properties.map((property, index) => lockedColumns.includes(property) ? index : -1).filter(index => index !== -1);
         for (let i = 0; i < properties.length; i++) {
-            const isLocked = i === guidColumnIndex || i === classColumnIndex;
+            const isLocked = lockedColumnIndices.includes(i);
             const columnLetter = getColumnLetter(i);
             if (!isLocked) sheet.getRange(`${columnLetter}2:${columnLetter}${lastRow}`).format.protection.locked = false;
         }
