@@ -13,9 +13,14 @@ export async function getUpdatedModelData(): Promise<ModelData> {
         for (let row = 1; row < usedRange.values.length; row++) {
             let record = {} as Record<string, any>;
             for (let column = 0; column <= lastColumnIndex; column++) {
-                const fieldName = usedRange.values[0][column]
+                const [key, subKey] = usedRange.values[0][column].split(': ');
                 const fieldValue = usedRange.values[row][column]
-                if(!!fieldValue) record[fieldName] = isJSON(fieldValue) ? JSON.parse(fieldValue) : fieldValue;
+                if (subKey) {
+                    if (!record[key]) record[key] = {};
+                    record[key][subKey] = fieldValue;
+                } else {
+                    record[key] = fieldValue;
+                }
             }
 
             updatedData.push(record);
@@ -45,12 +50,4 @@ export function computeModifications(oldData: ModelData, newData: ModelData): Mo
     }
 
     return {Values: changes}
-}
-
-function isJSON(str) {
-    try {
-        return JSON.parse(str) && !!str;
-    } catch (e) {
-        return false;
-    }
 }

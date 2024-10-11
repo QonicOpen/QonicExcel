@@ -15,20 +15,29 @@ export async function fillModelData(data: ModelData): Promise<void>
             return;
         }
 
-        const lastColumn = getColumnLetter(Object.keys(data.records[0]).length - 1);
-        const lastRow = data.records.length + 1;
-        const headerAddress = `A1:${lastColumn}1`;
-        const dataAddress = `A2:${lastColumn}${lastRow}`;
 
         // Update headers
-        const properties = Array.from(new Set(data.records.flatMap(item => Object.keys(item))))
+        const properties = Array.from(new Set(data.records.flatMap(item => {
+            return Object.entries(item).flatMap((kvp) => {
+                const [key, value] = kvp;
+                if (typeof value === 'object') return Object.keys(value).map(subKey => `${key}: ${subKey}`)
+                return key;
+            });
+        })))
+
+        const lastColumn = getColumnLetter(properties.length - 1);
+        const headerAddress = `A1:${lastColumn}1`;
         const headerRange = sheet.getRange(headerAddress);
         headerRange.values = [properties];
         headerRange.format.font.bold = true;
 
         // Update data
-        const rows = data.records.map(item => properties.map(prop => {
-            return typeof item[prop] === 'object' ? JSON.stringify(item[prop]) : item[prop]
+        const lastRow = data.records.length + 1;
+        const dataAddress = `A2:${lastColumn}${lastRow}`;
+        const rows = data.records.map(item => properties.map(property => {
+            const [key, subKey] = property.split(': ');
+            if (subKey) return item[key][subKey];
+            return item[key];
         }));
 
         const dataRange = sheet.getRange(dataAddress);
@@ -60,6 +69,9 @@ export async function fillModelData(data: ModelData): Promise<void>
         }
 
         await context.sync();
+    }).catch(error => {
+        console.error(error);
+        throw error;
     })
 }
 
