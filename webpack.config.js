@@ -20,7 +20,7 @@ async function getHttpsOptions() {
 
 module.exports = async (env, options) => {
   const dev = options.mode === "development";
-  const mode = argv.mode || 'development'; // Get mode from arguments or default to 'development'
+  const mode = options.mode || 'development'; // Get mode from arguments or default to 'development'
   const envFilePath = path.resolve(__dirname, `config/.env.${mode}`);
   const envConfig = dotenv.config({ path: envFilePath }).parsed;
   const envKeys = Object.keys(envConfig).reduce((prev, next) => {

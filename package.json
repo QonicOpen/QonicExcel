@@ -13,8 +13,6 @@
   },
   "scripts": {
     "dev-server": "webpack serve --mode development",
-    "demo-server": "webpack serve --mode demo",
-    "rc-server": "webpack serve --mode rc",
     "server": "webpack serve --mode production",
 
     "build": "webpack --mode production",
