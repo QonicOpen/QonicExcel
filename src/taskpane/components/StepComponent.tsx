@@ -3,7 +3,7 @@ import {SetDataFilters} from "./steps/SetDataFilters";
 import {SetFilterValues} from "./steps/SetFilterValues";
 import {UtilizeData} from "./steps/UtilizeData";
 import React, {useEffect} from "react";
-import {useAvailableDataProducts, useQueryProductsMutation} from "../utils/api";
+import {useAvailableDataProducts, useProducts, useStartSessionMutation, useEndSessionMutation} from "../utils/api";
 import {previousStep, stepProgress, stepIndex, Steps, stepTitle, totalSteps} from "../utils/steps";
 import StepIndicator from "./elements/StepIndicator";
 import {LoadDataFilters} from "./steps/LoadDataFilters";
@@ -18,9 +18,9 @@ import {EditingAccessDenied} from "./steps/EditingAccessDenied";
 
 const StepComponent: React.FC = () => {
     const {activeWorkSheet, updateWorksheetState} = useWorksheetContext();
-    const {currentStep, selectedModelData, selectedModel, selectedFilters, selectedFilterValues, error} = activeWorkSheet;
+    const {currentStep, selectedModel, selectedFilters, selectedFilterValues, error} = activeWorkSheet;
     const {data: availableData} = useAvailableDataProducts(selectedModel.projectId, selectedModel.modelId, stepIndex(currentStep) >= stepIndex(Steps.LOAD_DATA_FILTERS))
-    const queryProductsMutation = useQueryProductsMutation(selectedModel.projectId, selectedModel.modelId);
+    const {data: modelQueryData} = useProducts(selectedModel.projectId, selectedModel.modelId, selectedFilters, selectedFilterValues, stepIndex(currentStep) >= stepIndex(Steps.LOAD_QUERY_DATA));
 
     useEffect(() => {
         if (!!availableData && currentStep === Steps.LOAD_DATA_FILTERS) {
@@ -29,21 +29,17 @@ const StepComponent: React.FC = () => {
     }, [updateWorksheetState, availableData, currentStep]);
 
     useEffect(() => {
-        console.log('currentStep', currentStep, selectedModelData)
-        if (currentStep === Steps.LOAD_QUERY_DATA) {
-            queryProductsMutation.mutateAsync({ fields: selectedFilters, filters: selectedFilterValues })
-                .then((modelQueryData) => {
-                    if (modelQueryData.records.length === 0) {
-                        updateWorksheetState({currentStep: Steps.NO_FILTER_RESULTS});
-                        return;
-                    }
+        if (!!modelQueryData && currentStep === Steps.LOAD_QUERY_DATA) {
+            if (modelQueryData.records.length === 0) {
+                updateWorksheetState({currentStep: Steps.NO_FILTER_RESULTS});
+                return;
+            }
 
-                    fillModelData(modelQueryData)
-                        .then(() => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false, selectedModelData: modelQueryData}))
-                        .catch((error) => updateWorksheetState({error: new PluginError(PluginErrors.ImportDataFailed, error.message)}))
-                })
+            fillModelData(modelQueryData)
+                .then(() => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false, selectedModelData: modelQueryData}))
+                .catch((error) => updateWorksheetState({error: new PluginError(PluginErrors.ImportDataFailed, error.message)}))
         }
-    }, [updateWorksheetState, activeWorkSheet, currentStep]);
+    }, [updateWorksheetState, modelQueryData, currentStep]);
 
     const renderStepComponent = () => {
         switch (currentStep) {
