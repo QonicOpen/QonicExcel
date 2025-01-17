@@ -1,5 +1,5 @@
 import {useMutation, useQuery} from "@tanstack/react-query";
-import {Model, ModelData, ModelModificationErrors, ModelModifications, ModelProps, Project} from "./types";
+import {Model, ModelData, ModelModificationErrors, ModelModifications, ModelProps, ProductsQuery, Project} from "./types";
 import {PluginError, PluginErrors} from "./plugin-error";
 import {useAuth} from "../providers/AuthProvider";
 import {useWorksheetContext} from "../providers/WorksheetProvider";
@@ -24,23 +24,27 @@ export const useModels = (projectId: string) => useApiQuery<Model[]>({
     formatJson: (response) => response.models
 })
 
-export const useModelFilters = (projectId: string, modelId: string, isEnabled: boolean) => useApiQuery<string[]>({
+export const useAvailableDataProducts = (projectId: string, modelId: string, isEnabled: boolean) => useApiQuery<string[]>({
     queryKey: ['modelFilters', projectId, modelId],
-    queryUrl: `projects/${projectId}/models/${modelId}/external-query-available-data`,
+    queryUrl: `projects/${projectId}/models/${modelId}/products/available-data`,
     errorType: PluginErrors.LoadPropertiesFailed,
     isEnabled: !!projectId && !!modelId && isEnabled,
     formatJson: (response) => response.fields
 })
 
-export const useModelData = (projectId: string, modelId: string, includeFields: string[], includeFilters: Record<string, string>, isEnabled: boolean) => {
-    const queryUrl = `projects/${projectId}/models/${modelId}/external-query${getModelQuery(includeFields, includeFilters)}`;
+export const useQueryProductsMutation = (projectId: string, modelId: string) => {
+    const {updateWorksheetState} = useWorksheetContext();
+    const {getSession} = useSessionContext();
+    const sessionId = getSession(modelId)?.sessionId
 
-    return useApiQuery<ModelData>({
-        queryKey: ['modelData', queryUrl],
-        queryUrl: queryUrl,
-        errorType: PluginErrors.ImportDataFailed,
-        isEnabled: !!projectId && !!modelId && isEnabled,
-        formatJson: (response) => ({records: response.result.map((record) => ({...record}))})
+    return useApiMutation<ProductsQuery, ModelData>({
+        mutationUrl: `projects/${projectId}/models/${modelId}/products/query`,
+        formatJson: (response) => ({records: response.result.map((record) => ({...record}))}),
+        onError: (response, error) => {
+            if (response && response.status === 403) updateWorksheetState({currentStep: Steps.EDITING_ACCESS_DENIED});
+            else updateWorksheetState({error: new PluginError(PluginErrors.ImportDataFailed, error.message)});
+        },
+        sessionId
     })
 }
 

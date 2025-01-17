@@ -36,10 +36,10 @@ To start the development server and run the add-in, use the following commands:
 
 1. **Start the Dev Server:**
 
-   The dev server is responsible for running the backend necessary for the add-in.
+   The server is responsible for running the backend necessary for the add-in.
 
     ```bash
-    npm run dev-server
+    npm run server
     ```
 
 2. **Start the Add-in:**

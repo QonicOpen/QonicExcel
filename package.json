@@ -12,8 +12,9 @@
     "dev_server_port": 3000
   },
   "scripts": {
-    "dev-server": "webpack serve --mode development",
     "server": "webpack serve --mode production",
+    "dev-server": "webpack serve --mode development",
+    "rc-server": "webpack serve --mode rc",
 
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
