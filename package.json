@@ -15,8 +15,8 @@
     "server": "webpack serve --mode production",
     "dev-server": "webpack serve --mode development",
 
-    "test-dev-server": "NODE_ENV=develop webpack serve --mode development",
-    "test-rc-server": "NODE_ENV=rc webpack serve --mode development",
+    "test-dev-server": "set NODE_ENV=develop webpack serve --mode development",
+    "test-rc-server": "set NODE_ENV=rc webpack serve --mode development",
 
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
