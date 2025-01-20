@@ -50,7 +50,7 @@ export const useSaveModelDataMutation = (projectId: string, modelId: string) => 
     const sessionId = getSession(modelId)?.sessionId
 
     return useApiMutation<ModelModifications, ModelModificationErrors>({
-        mutationUrl: `projects/${projectId}/models/${modelId}/external-data-modification`,
+        mutationUrl: `projects/${projectId}/models/${modelId}/products`,
         onError: (response, error) => {
             if (response && response.status === 403) updateWorksheetState({currentStep: Steps.EDITING_ACCESS_DENIED});
             else updateWorksheetState({error: new PluginError(PluginErrors.SaveDataFailed, error.message)});
