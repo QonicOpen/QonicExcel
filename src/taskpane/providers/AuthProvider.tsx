@@ -25,7 +25,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             let messageFromDialog = JSON.parse(arg.message);
             if (messageFromDialog.status === 'success') {
-                localStorage.setItem('apiToken', messageFromDialog.token);
+                console.log(process.env.API_ENV + '-apiToken')
+                localStorage.setItem(process.env.API_ENV + '-apiToken', messageFromDialog.token);
                 setApiToken(messageFromDialog.token);
             } else {
                 throw new PluginError(PluginErrors.LoginFailed);
@@ -35,7 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
 
         const checkAuthAndTriggerLogin = async () => {
-            const storedApiToken = localStorage.getItem('apiToken');
+            const storedApiToken = localStorage.getItem(process.env.API_ENV + '-apiToken');
             if (isTokenValid(storedApiToken)) {
                 setApiToken(storedApiToken);
                 return;
