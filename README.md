@@ -18,7 +18,7 @@ To install and set up the Qonic Excel add-in, follow these steps:
 1. **Clone the Repository:**
 
     ```bash
-    git clone https://github.com/iQonic/QonicExcel.git
+    git clone https://github.com/QonicOpen/QonicExcel.git
     cd QonicExcel
     ```
 
