@@ -1,6 +1,6 @@
 import {ModelData, ModelModifications} from "../utils/types";
 
-export async function getUpdatedModelData(): Promise<ModelData> {
+export async function getCurrentModelData(): Promise<ModelData> {
     return Excel.run(async function (context): Promise<ModelData> {
         const sheet = context.workbook.worksheets.getActiveWorksheet();
 

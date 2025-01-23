@@ -14,6 +14,7 @@ import {Fallback} from "./elements/Fallback";
 import {PluginError, PluginErrors} from "../utils/plugin-error";
 import {NoFilterResults} from "./steps/NoFilterResults";
 import {EditingAccessDenied} from "./steps/EditingAccessDenied";
+import {getCurrentModelData} from "../excel/getModelModifications";
 
 
 const StepComponent: React.FC = () => {
@@ -39,7 +40,8 @@ const StepComponent: React.FC = () => {
                     }
 
                     fillModelData(modelQueryData)
-                        .then(() => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false, selectedModelData: modelQueryData}))
+                        .then(() => getCurrentModelData())
+                        .then((selectedModelData) => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false, selectedModelData}))
                         .catch((error) => updateWorksheetState({error: new PluginError(PluginErrors.ImportDataFailed, error.message)}))
                 })
         }
