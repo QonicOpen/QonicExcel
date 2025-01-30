@@ -24,16 +24,16 @@ export const useModels = (projectId: string) => useApiQuery<Model[]>({
     formatJson: (response) => response.models
 })
 
-export const useModelFilters = (projectId: string, modelId: string, isEnabled: boolean) => useApiQuery<string[]>({
+export const useAvailableDataProducts = (projectId: string, modelId: string, isEnabled: boolean) => useApiQuery<string[]>({
     queryKey: ['modelFilters', projectId, modelId],
-    queryUrl: `projects/${projectId}/models/${modelId}/external-query-available-data`,
+    queryUrl: `projects/${projectId}/models/${modelId}/products/available-data`,
     errorType: PluginErrors.LoadPropertiesFailed,
     isEnabled: !!projectId && !!modelId && isEnabled,
     formatJson: (response) => response.fields
 })
 
-export const useModelData = (projectId: string, modelId: string, includeFields: string[], includeFilters: Record<string, string>, isEnabled: boolean) => {
-    const queryUrl = `projects/${projectId}/models/${modelId}/external-query${getModelQuery(includeFields, includeFilters)}`;
+export const useProducts = (projectId: string, modelId: string, includeFields: string[], includeFilters: Record<string, string>, isEnabled: boolean) => {
+    const queryUrl = `projects/${projectId}/models/${modelId}/products${getModelQuery(includeFields, includeFilters)}`;
 
     return useApiQuery<ModelData>({
         queryKey: ['modelData', queryUrl],
@@ -50,7 +50,7 @@ export const useSaveModelDataMutation = (projectId: string, modelId: string) => 
     const sessionId = getSession(modelId)?.sessionId
 
     return useApiMutation<ModelModifications, ModelModificationErrors>({
-        mutationUrl: `projects/${projectId}/models/${modelId}/external-data-modification`,
+        mutationUrl: `projects/${projectId}/models/${modelId}/products`,
         onError: (response, error) => {
             if (response && response.status === 403) updateWorksheetState({currentStep: Steps.EDITING_ACCESS_DENIED});
             else updateWorksheetState({error: new PluginError(PluginErrors.SaveDataFailed, error.message)});

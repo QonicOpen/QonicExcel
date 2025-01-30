@@ -3,7 +3,7 @@ import {SetDataFilters} from "./steps/SetDataFilters";
 import {SetFilterValues} from "./steps/SetFilterValues";
 import {UtilizeData} from "./steps/UtilizeData";
 import React, {useEffect} from "react";
-import {useModelFilters, useModelData, useStartSessionMutation, useEndSessionMutation} from "../utils/api";
+import {useAvailableDataProducts, useProducts, useStartSessionMutation, useEndSessionMutation} from "../utils/api";
 import {previousStep, stepProgress, stepIndex, Steps, stepTitle, totalSteps} from "../utils/steps";
 import StepIndicator from "./elements/StepIndicator";
 import {LoadDataFilters} from "./steps/LoadDataFilters";
@@ -14,13 +14,14 @@ import {Fallback} from "./elements/Fallback";
 import {PluginError, PluginErrors} from "../utils/plugin-error";
 import {NoFilterResults} from "./steps/NoFilterResults";
 import {EditingAccessDenied} from "./steps/EditingAccessDenied";
+import {getCurrentModelData} from "../excel/getModelModifications";
 
 
 const StepComponent: React.FC = () => {
     const {activeWorkSheet, updateWorksheetState} = useWorksheetContext();
     const {currentStep, selectedModel, selectedFilters, selectedFilterValues, error} = activeWorkSheet;
-    const {data: availableData} = useModelFilters(selectedModel.projectId, selectedModel.modelId, stepIndex(currentStep) >= stepIndex(Steps.LOAD_DATA_FILTERS))
-    const {data: modelQueryData} = useModelData(selectedModel.projectId, selectedModel.modelId, selectedFilters, selectedFilterValues, stepIndex(currentStep) >= stepIndex(Steps.LOAD_QUERY_DATA));
+    const {data: availableData} = useAvailableDataProducts(selectedModel.projectId, selectedModel.modelId, stepIndex(currentStep) >= stepIndex(Steps.LOAD_DATA_FILTERS))
+    const {data: modelQueryData, isLoading} = useProducts(selectedModel.projectId, selectedModel.modelId, selectedFilters, selectedFilterValues, stepIndex(currentStep) >= stepIndex(Steps.LOAD_QUERY_DATA));
 
     useEffect(() => {
         if (!!availableData && currentStep === Steps.LOAD_DATA_FILTERS) {
@@ -29,14 +30,15 @@ const StepComponent: React.FC = () => {
     }, [updateWorksheetState, availableData, currentStep]);
 
     useEffect(() => {
-        if (!!modelQueryData && currentStep === Steps.LOAD_QUERY_DATA) {
+        if (!!modelQueryData && !isLoading && currentStep === Steps.LOAD_QUERY_DATA) {
             if (modelQueryData.records.length === 0) {
                 updateWorksheetState({currentStep: Steps.NO_FILTER_RESULTS});
                 return;
             }
 
             fillModelData(modelQueryData)
-                .then(() => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false, selectedModelData: modelQueryData}))
+                .then(() => getCurrentModelData())
+                .then((selectedModelData) => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false, selectedModelData}))
                 .catch((error) => updateWorksheetState({error: new PluginError(PluginErrors.ImportDataFailed, error.message)}))
         }
     }, [updateWorksheetState, modelQueryData, currentStep]);

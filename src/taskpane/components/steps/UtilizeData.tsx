@@ -2,7 +2,7 @@ import React, {useCallback} from "react";
 import {useSaveModelDataMutation} from "../../utils/api";
 import {useWorksheetContext} from "../../providers/WorksheetProvider";
 import {ModelModificationErrors} from "../../utils/types";
-import {computeModifications, getUpdatedModelData} from "../../excel/getModelModifications";
+import {computeModifications, getCurrentModelData} from "../../excel/getModelModifications";
 import {PluginError, PluginErrors} from "../../utils/plugin-error";
 import {ButtonOverlay} from "../elements/ButtonOverlay";
 import {getCellErrors} from "../../excel/getCellErrors";
@@ -45,7 +45,7 @@ export const UtilizeData: React.FC = () => {
 
     const onSaveChanges = useCallback(async () => {
         setIsSaving(true)
-        const updatedModelData = await getUpdatedModelData();
+        const updatedModelData = await getCurrentModelData();
         const modifications = computeModifications(selectedModelData, updatedModelData);
         if (Object.keys(modifications.Values).length === 0) {
             setIsSaving(false)
