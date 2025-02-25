@@ -49,8 +49,3 @@ export interface ModelProps {
     modelId: string;
     sessionId: string;
 }
-
-export interface ProductsQuery {
-    fields: string[];
-    filters: Record<string, string>;
-}
