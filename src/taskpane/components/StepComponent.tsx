@@ -35,11 +35,11 @@ const StepComponent: React.FC = () => {
                 updateWorksheetState({currentStep: Steps.NO_FILTER_RESULTS});
                 return;
             }
-
-            fillModelData(modelQueryData)
-                .then(() => getCurrentModelData())
-                .then((selectedModelData) => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false, selectedModelData}))
-                .catch((error) => updateWorksheetState({error: new PluginError(PluginErrors.ImportDataFailed, error.message)}))
+                    fillModelData(modelQueryData)
+                        .then(() => getCurrentModelData())
+                        .then((selectedModelData) => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false, selectedModelData}))
+                        .catch((error) => updateWorksheetState({error: new PluginError(PluginErrors.ImportDataFailed, error.message)}))
+                })
         }
     }, [updateWorksheetState, modelQueryData, currentStep]);
 
