@@ -49,5 +49,5 @@ export function computeModifications(oldData: ModelData, newData: ModelData): Mo
         }
     }
 
-    return {Values: changes}
+    return {Update: changes}
 }

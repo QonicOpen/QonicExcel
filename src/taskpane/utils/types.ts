@@ -41,7 +41,7 @@ export interface CellError {
 }
 
 export interface ModelModifications {
-    Values: Record<string, Record<string, string>>;
+    Update: Record<string, Record<string, string>>;
 }
 
 export interface ModelProps {
