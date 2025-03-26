@@ -47,7 +47,7 @@ export const UtilizeData: React.FC = () => {
         setIsSaving(true)
         const updatedModelData = await getCurrentModelData();
         const modifications = computeModifications(selectedModelData, updatedModelData);
-        if (Object.keys(modifications.Values).length === 0) {
+        if (Object.keys(modifications.Update).length === 0) {
             setIsSaving(false)
             showNoModificationsToast()
             return;
