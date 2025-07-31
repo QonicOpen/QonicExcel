@@ -9,6 +9,13 @@ export const SetFilterValues = () => {
     const { activeWorkSheet: { selectedFilters, selectedFilterValues }, updateWorksheetState } = useWorksheetContext();
 
     const onChangeFilterValue = useCallback((filter: string, value: string) => {
+        if(!value) {
+            const newSelectedFilterValues = {...selectedFilterValues};
+            delete newSelectedFilterValues[filter];
+            updateWorksheetState({selectedFilterValues: newSelectedFilterValues});
+            return;
+        }
+
         updateWorksheetState({selectedFilterValues: {...selectedFilterValues, [filter]: value}});
     }, [selectedFilterValues, updateWorksheetState]);
 
