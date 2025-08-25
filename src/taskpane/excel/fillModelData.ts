@@ -1,7 +1,7 @@
 import {ModelData} from "../utils/types";
 import {getColumnLetter} from "./utils";
 
-const lockedColumns = ["Guid", "Class", "MaterialLayerSet", "SpatialLocation: Site", "SpatialLocation: Building", "SpatialLocation: Floor",, "SpatialLocation: Space"]
+const lockedColumns = ["Guid", "Class", "MaterialLayerSet", "SpatialLocation: Site", "SpatialLocation: Building", "SpatialLocation: Floor",, "SpatialLocation: Space", "Code"]
 
 export async function fillModelData(data: ModelData): Promise<void>
 {
@@ -22,7 +22,7 @@ export async function fillModelData(data: ModelData): Promise<void>
         const properties = Array.from(new Set(data.records.flatMap(item => {
             return Object.entries(item).flatMap((kvp) => {
                 const [key, value] = kvp;
-                if (typeof value === 'object') return Object.keys(value).map(subKey => `${key}: ${subKey}`)
+                if (typeof value === 'object' && key !== "Code") return Object.keys(value).map(subKey => `${key}: ${subKey}`)
                 return key;
             });
         })))
@@ -38,9 +38,11 @@ export async function fillModelData(data: ModelData): Promise<void>
         const dataAddress = `A2:${lastColumn}${lastRow}`;
         const rows = data.records.map(item => properties.map(property => {
             const [key, subKey] = property.split(': ');
+            if (key === "Code") return JSON.stringify(item[key]);
             if (subKey) return item[key][subKey];
             return item[key];
         }));
+
 
         const dataRange = sheet.getRange(dataAddress);
         dataRange.values = rows;

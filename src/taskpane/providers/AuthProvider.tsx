@@ -25,7 +25,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             let messageFromDialog = JSON.parse(arg.message);
             if (messageFromDialog.status === 'success') {
-                console.log(process.env.API_ENV + '-apiToken')
                 localStorage.setItem(process.env.API_ENV + '-apiToken', messageFromDialog.token);
                 setApiToken(messageFromDialog.token);
             } else {
