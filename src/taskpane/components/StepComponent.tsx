@@ -30,8 +30,7 @@ const StepComponent: React.FC = () => {
     }, [updateWorksheetState, availableData, currentStep]);
 
     useEffect(() => {
-        console.log('currentStep', currentStep, selectedModelData)
-        if (currentStep === Steps.LOAD_QUERY_DATA) {
+        if (currentStep === Steps.LOAD_QUERY_DATA && !error) {
             queryProductsMutation.mutateAsync({ fields: selectedFilters, filters: selectedFilterValues })
                 .then((modelQueryData) => {
                     if (modelQueryData.records.length === 0) {
@@ -42,10 +41,10 @@ const StepComponent: React.FC = () => {
                     fillModelData(modelQueryData)
                         .then(() => getCurrentModelData())
                         .then((selectedModelData) => updateWorksheetState({currentStep: Steps.UTILIZE_DATA, cellErrors: [], hasCellErrors: false, selectedModelData}))
-                        .catch((error) => updateWorksheetState({error: new PluginError(PluginErrors.ImportDataFailed, error.message)}))
+                        .catch((error) => updateWorksheetState({ error: new PluginError(PluginErrors.ImportDataFailed, error.message)}))
                 })
         }
-    }, [updateWorksheetState, activeWorkSheet, currentStep]);
+    }, [updateWorksheetState, activeWorkSheet, currentStep, error]);
 
     const renderStepComponent = () => {
         switch (currentStep) {
