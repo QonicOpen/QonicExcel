@@ -11,6 +11,7 @@ interface AuthContextType {
 }
 
 const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
+const apiTokenKey = process.env.API_ENV ? process.env.API_ENV + '_qonic_api_token' : 'qonic_api_token';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [apiToken, setApiToken] = React.useState<string | null>(null);
@@ -25,7 +26,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             let messageFromDialog = JSON.parse(arg.message);
             if (messageFromDialog.status === 'success') {
-                localStorage.setItem(process.env.API_ENV + '-apiToken', messageFromDialog.token);
+                localStorage.setItem(apiTokenKey, messageFromDialog.token);
                 setApiToken(messageFromDialog.token);
             } else {
                 throw new PluginError(PluginErrors.LoginFailed);
@@ -35,7 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
 
         const checkAuthAndTriggerLogin = async () => {
-            const storedApiToken = localStorage.getItem(process.env.API_ENV + '-apiToken');
+            const storedApiToken = localStorage.getItem(apiTokenKey);
             if (isTokenValid(storedApiToken)) {
                 setApiToken(storedApiToken);
                 return;

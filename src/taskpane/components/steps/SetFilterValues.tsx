@@ -4,24 +4,27 @@ import {XMarkIcon} from "@heroicons/react/24/outline";
 import {useWorksheetContext} from "../../providers/WorksheetProvider";
 import {Steps} from "../../utils/steps";
 import classNames from "../../utils/class-names";
+import {ProductFilter} from "../../utils/types";
 
 export const SetFilterValues = () => {
     const { activeWorkSheet: { selectedFilters, selectedFilterValues }, updateWorksheetState } = useWorksheetContext();
 
     const onChangeFilterValue = useCallback((filter: string, value: string) => {
-        if(!value) {
-            const newSelectedFilterValues = {...selectedFilterValues};
-            delete newSelectedFilterValues[filter];
-            updateWorksheetState({selectedFilterValues: newSelectedFilterValues});
-            return;
-        }
+        let filters = selectedFilterValues.filter(f => f.property !== filter);
+        if (value) filters = [...filters, { property: filter, value, operator: 'Contains'} as ProductFilter];
+        updateWorksheetState({selectedFilterValues: filters});
 
-        updateWorksheetState({selectedFilterValues: {...selectedFilterValues, [filter]: value}});
     }, [selectedFilterValues, updateWorksheetState]);
 
     const onChooseFilterValues = useCallback(() => {
         updateWorksheetState({currentStep: Steps.LOAD_QUERY_DATA});
     }, [updateWorksheetState]);
+
+
+    const getFilterValue = (filter: string): string => {
+        const filterValue = selectedFilterValues.find(f => f.property === filter);
+        return filterValue ? filterValue.value : '';
+    }
 
     return (
         <div className="mt-2">
@@ -38,7 +41,7 @@ export const SetFilterValues = () => {
                             }}
                             autoComplete="off"
                             className="w-full appearance-none border border-gray-200 rounded-sm py-1 px-2 text-sm leading-tight focus:outline-none focus:shadow-outline focus:ring-0 focus:border-primary-500 p-1.5"
-                            type="text" placeholder="Filter value" value={selectedFilterValues[dataFilter] ?? ''}
+                            type="text" placeholder="Filter value" value={getFilterValue(dataFilter)}
                             onChange={(e) => onChangeFilterValue(dataFilter, e.target.value)}/>
                         {selectedFilterValues[dataFilter] &&
                             (<XMarkIcon

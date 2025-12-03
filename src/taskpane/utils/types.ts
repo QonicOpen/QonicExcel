@@ -52,5 +52,11 @@ export interface ModelProps {
 
 export interface ProductsQuery {
     fields: string[];
-    filters: Record<string, string>;
+    filters: ProductFilter[];
+}
+
+export interface ProductFilter {
+    property: string;
+    value: string;
+    operator: 'Equals' | 'NotEquals' | 'In' | 'NotIn' | 'Contains';
 }
