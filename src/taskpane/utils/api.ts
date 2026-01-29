@@ -26,7 +26,7 @@ export const useModels = (projectId: string) => useApiQuery<Model[]>({
 
 export const useAvailableDataProducts = (projectId: string, modelId: string, isEnabled: boolean) => useApiQuery<string[]>({
     queryKey: ['modelFilters', projectId, modelId],
-    queryUrl: `projects/${projectId}/models/${modelId}/products/available-data`,
+    queryUrl: `projects/${projectId}/models/${modelId}/products/properties/available-data`,
     errorType: PluginErrors.LoadPropertiesFailed,
     isEnabled: !!projectId && !!modelId && isEnabled,
     formatJson: (response) => response.fields
@@ -35,16 +35,14 @@ export const useAvailableDataProducts = (projectId: string, modelId: string, isE
 export const useQueryProductsMutation = (projectId: string, modelId: string) => {
     const {updateWorksheetState} = useWorksheetContext();
     const {getSession} = useSessionContext();
-    const sessionId = getSession(modelId)?.sessionId
 
     return useApiMutation<ProductsQuery, ModelData>({
-        mutationUrl: `projects/${projectId}/models/${modelId}/products/query`,
+        mutationUrl: `projects/${projectId}/models/${modelId}/products/properties/query`,
         formatJson: (response) => ({records: response.result.map((record) => ({...record}))}),
         onError: (response, error) => {
             if (response && response.status === 403) updateWorksheetState({currentStep: Steps.EDITING_ACCESS_DENIED});
             else updateWorksheetState({error: new PluginError(PluginErrors.ImportDataFailed, error.message)});
-        },
-        sessionId
+        }
     })
 }
 
@@ -63,20 +61,47 @@ export const useSaveModelDataMutation = (projectId: string, modelId: string) => 
     })
 }
 
-export const useStartSessionMutation = () => {
-    const {apiToken} = useAuth();
-    return useCallback(({modelId, projectId, sessionId}: ModelProps) => {
-        navigator.sendBeacon(`${baseUrl}/projects/${projectId}/models/${modelId}/start-session?session_id=${sessionId}&access_token=${apiToken}`);
+type SessionArgs = { projectId: string; modelId: string; sessionId: string };
 
-    }, [apiToken])
-}
+export const useStartSession = () => {
+    const { apiToken } = useAuth();
 
-export const useEndSessionMutation = () => {
-    const {apiToken} = useAuth();
-    return useCallback(({modelId, projectId, sessionId}: ModelProps) => {
-        navigator.sendBeacon(`${baseUrl}/projects/${projectId}/models/${modelId}/end-session?session_id=${sessionId}&access_token=${apiToken}`);
-    }, [apiToken])
-}
+    return useCallback(async ({ projectId, modelId, sessionId }: SessionArgs) => {
+        const resp = await fetch(
+            `${baseUrl}/projects/${projectId}/models/${modelId}/start-session`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${apiToken}`,
+                    "X-Client-Type": "Excel",
+                    "X-Client-Session-Id": sessionId,
+                },
+            }
+        );
+
+        if (!resp.ok) throw new Error(`start-session failed: ${resp.status}`);
+    }, [apiToken]);
+};
+
+export const useEndSession = () => {
+    const { apiToken } = useAuth();
+
+    return useCallback(async ({ projectId, modelId, sessionId }: SessionArgs) => {
+        const resp = await fetch(
+            `${baseUrl}/projects/${projectId}/models/${modelId}/end-session`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${apiToken}`,
+                    "X-Client-Type": "Excel",
+                    "X-Client-Session-Id": sessionId,
+                },
+            }
+        );
+
+        if (!resp.ok) throw new Error(`end-session failed: ${resp.status}`);
+    }, [apiToken]);
+};
 
 const getModelQuery = (includeFields: string[], includeFilters: Record<string, string>) => {
     let query = "?";
@@ -147,10 +172,10 @@ export const useApiQuery = <T>({
 
 interface ApiMutationOptions<ResponseType> {
     mutationUrl: string;
-    sessionId: string;
     method?: string;
     formatJson?: (json: any) => ResponseType;
     onError?: (response: Response, error: any) => void;
+    sessionId?: string;
 }
 
 export const useApiMutation = <InputType, ResponseType>({
@@ -164,15 +189,17 @@ export const useApiMutation = <InputType, ResponseType>({
     return useMutation({
         mutationFn: async (variables: InputType ) => {
             let response: Response;
+            let requestHeaders: Record<string, string> = {
+                ...headers,
+                'Content-Type': 'application/json',
+                'X-Client-Type': 'Excel'
+            }
+            if(!!sessionId) headers['X-Client-Session-Id'] = sessionId;
+
             try {
                 response = await fetch(`${baseUrl}/${mutationUrl}`, {
                     method,
-                    headers: {
-                        ...headers,
-                        'Content-Type': 'application/json',
-                        'X-Client-Session-Id': sessionId,
-                        'X-Client-Type': 'Excel'
-                    },
+                    headers: requestHeaders,
                     body: JSON.stringify(variables),
                 });
                 if (!response.ok) throw new Error(`Error ${response.status}: request failed`);
