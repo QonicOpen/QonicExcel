@@ -21,7 +21,7 @@ async function getHttpsOptions() {
 module.exports = async (env, options) => {
   const dev = options.mode === "development";
   const dotenvFilename = process.env.NODE_ENV || 'production';
-  const envFilePath = path.resolve(__dirname, `config/.env.${dotenvFilename}`);
+  const envFilePath = path.resolve(__dirname, `.env.${dotenvFilename}`);
   const envConfig = dotenv.config({ path: envFilePath }).parsed;
   const envKeys = Object.keys(envConfig).reduce((prev, next) => {
     prev[`process.env.${next}`] = JSON.stringify(envConfig[next])

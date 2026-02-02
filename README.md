@@ -15,40 +15,51 @@ Qonic is an Excel add-in that allows users to query model data and make modifica
 
 To install and set up the Qonic Excel add-in, follow these steps:
 
-1. **Clone the Repository:**
+### 1. Prerequisites
 
-    ```bash
-    git clone https://github.com/QonicOpen/QonicExcel.git
-    cd QonicExcel
-    ```
+-	[Node.js](https://nodejs.org/)
+-	A Qonic Application in the [Developer Portal](https://developer.qonic.com)
 
-2. **Install Dependencies:**
+You’ll need:
+- Client ID and Client Secret
+- Whitelisted Redirect URI: https://localhost:3000/login.html
 
-   Ensure you have [Node.js](https://nodejs.org/) installed, then run:
+### 2.  Copy the environment template
+```bash
+cp .env.develop.example .env.develop
+```
 
-    ```bash
-    npm install
-    ```
+### 3. Configure .env
+```bash
+# From your Developer Portal application
+QONIC_CLIENT_ID=YOUR_CLIENT_ID
+QONIC_CLIENT_SECRET=YOUR_CLIENT_SECRET
+```
+
+### 3. Install Dependencies:
+```bash
+npm install
+```
 
 ## Getting Started
 
 To start the development server and run the add-in, use the following commands:
 
-1. **Start the Dev Server:**
+### 1. Start the Dev Server
 
-   The server is responsible for running the backend necessary for the add-in.
+The server is responsible for running the backend necessary for the add-in.
 
-    ```bash
-    npm run server
-    ```
+```bash
+npm run server
+```
 
-2. **Start the Add-in:**
+### 2. Start the Add-in
 
-   This command starts your add-in and opens Excel with the add-in loaded.
+This command starts your add-in and opens Excel with the add-in loaded.
 
-    ```bash
-    npm start
-    ```
+```bash
+npm start
+```
 
 ## Usage
 

@@ -1,6 +1,6 @@
 import React, {createContext, useCallback, useEffect, useState} from "react";
 import {useWorksheetContext} from "./WorksheetProvider";
-import {useEndSessionMutation, useStartSessionMutation} from "../utils/api";
+import {useEndSession, useStartSession} from "../utils/api";
 import {Steps} from "../utils/steps";
 
 interface ModificationSession {
@@ -26,8 +26,8 @@ export const useSessionContext = () => {
 export const ModificationSessionProvider = ({children}) => {
     const { worksheets } = useWorksheetContext();
     const [activeSessions, setActiveSessions] = useState<ModificationSession[]>([]);
-    const startSession = useStartSessionMutation();
-    const endSession = useEndSessionMutation();
+    const startSession = useStartSession();
+    const endSession = useEndSession();
 
     const addSession = useCallback((projectId: string, modelId: string, sessionId: string) => setActiveSessions(activeSession => [...activeSession, { modelId, sessionId, projectId }]), []);
     const removeSession = useCallback((modelId: string) => setActiveSessions(activeSession => activeSession.filter(session => session.modelId !== modelId)), []);
@@ -41,7 +41,7 @@ export const ModificationSessionProvider = ({children}) => {
             const { projectId, modelId } = worksheet.selectedModel;
             const sessionId = crypto.randomUUID()
             addSession(projectId, modelId, sessionId);
-            startSession({ projectId, modelId, sessionId })
+            startSession({ projectId, modelId, sessionId });
         });
 
         const modelsToEndSession = worksheets.filter(worksheet => worksheet.currentStep !== Steps.UTILIZE_DATA && hasSession(worksheet.selectedModel.modelId));
@@ -49,7 +49,7 @@ export const ModificationSessionProvider = ({children}) => {
             const { projectId, modelId } = worksheet.selectedModel;
             const { sessionId } = getSession(modelId);
             removeSession(modelId);
-            endSession({ projectId, modelId, sessionId })
+            endSession({ projectId, modelId, sessionId });
         });
     }, [worksheets, activeSessions]);
 
