@@ -29,6 +29,11 @@ module.exports = async (env, options) => {
   }, {})
 
   const config = {
+    performance: { hints: false },
+    stats: {
+      all: true,
+      warnings: false,
+    },
     devtool: "source-map",
     entry: {
       polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
