@@ -12,7 +12,7 @@
     "dev_server_port": 3000
   },
   "scripts": {
-    "server": "webpack serve --mode production",
+    "server": "webpack serve --mode production --mode development",
     "dev-server": "webpack serve --mode development",
     "test-dev-server": "cross-env NODE_ENV=develop webpack serve --mode development",
     "test-rc-server": "cross-env NODE_ENV=rc webpack serve --mode development",
