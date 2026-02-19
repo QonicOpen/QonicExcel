@@ -20,13 +20,19 @@ async function getHttpsOptions() {
 
 module.exports = async (env, options) => {
   const dev = options.mode === "development";
-  const dotenvFilename = process.env.NODE_ENV || 'production';
-  const envFilePath = path.resolve(__dirname, `.env.${dotenvFilename}`);
-  const envConfig = dotenv.config({ path: envFilePath }).parsed;
+  const dotenvFilename = process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : ".env";
+  const envFilePath = path.resolve(__dirname, dotenvFilename);
+  const envConfig = dotenv.config({ path: envFilePath }).parsed || {};
   const envKeys = Object.keys(envConfig).reduce((prev, next) => {
-    prev[`process.env.${next}`] = JSON.stringify(envConfig[next])
+    prev[`process.env.${next}`] = JSON.stringify(envConfig[next] ?? "");
     return prev
   }, {})
+
+
+  envKeys["process.env.QONIC_API_URL"] = JSON.stringify(envConfig.QONIC_API_URL ?? "https://api.qonic.com/v1");
+  envKeys["process.env.API_ENV"] = JSON.stringify(envConfig.API_ENV ?? "release");
+  envKeys["process.env.QONIC_CLIENT_ID"] = JSON.stringify(envConfig.QONIC_CLIENT_ID ?? "");
+  envKeys["process.env.QONIC_CLIENT_SECRET"] = JSON.stringify(envConfig.QONIC_CLIENT_SECRET ?? "");
 
   const config = {
     devtool: "source-map",

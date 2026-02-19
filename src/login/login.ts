@@ -1,6 +1,4 @@
-const QONIC_API_URL =
-    process.env.QONIC_API_URL ?? "https://api.qonic.com/v1";
-
+const apiUrl = process.env.QONIC_API_URL
 const QONIC_CLIENT_ID = process.env.QONIC_CLIENT_ID!;
 const QONIC_CLIENT_SECRET = process.env.QONIC_CLIENT_SECRET!;
 const QONIC_SCOPES = "projects:read models:read models:write";
@@ -68,7 +66,7 @@ async function startAuthorize(): Promise<void> {
 
     console.log(params)
 
-    window.location.href = `${QONIC_API_URL}/auth/authorize?${params.toString()}`;
+    window.location.href = `${apiUrl}/auth/authorize?${params.toString()}`;
 }
 
 async function handleCallback(): Promise<void> {
@@ -128,7 +126,7 @@ async function handleCallback(): Promise<void> {
     form.append("client_id", QONIC_CLIENT_ID);
     form.append("client_secret", QONIC_CLIENT_SECRET); // ⚠️ see note below
 
-    const resp = await fetch(`${QONIC_API_URL}/auth/token`, {
+    const resp = await fetch(`${apiUrl}/auth/token`, {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
