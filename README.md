@@ -26,7 +26,7 @@ You’ll need:
 
 ### 2.  Copy the environment template
 ```bash
-cp .env.develop.example .env.develop
+cp .env.example .env
 ```
 
 ### 3. Configure .env

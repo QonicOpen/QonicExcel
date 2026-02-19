@@ -7,8 +7,7 @@ import {Steps} from "./steps";
 import {useSessionContext} from "../providers/ModificationSessionProvider";
 import {useCallback} from "react";
 
-const baseUrl = process.env.QONIC_API_URL;
-
+const apiUrl = process.env.QONIC_API_URL;
 export const useProjects = () => useApiQuery<Project[]>({
     queryKey: ['projects'],
     queryUrl: `projects`,
@@ -68,7 +67,7 @@ export const useStartSession = () => {
 
     return useCallback(async ({ projectId, modelId, sessionId }: SessionArgs) => {
         const resp = await fetch(
-            `${baseUrl}/projects/${projectId}/models/${modelId}/start-session`,
+            `${apiUrl}/projects/${projectId}/models/${modelId}/start-session`,
             {
                 method: "POST",
                 headers: {
@@ -88,7 +87,7 @@ export const useEndSession = () => {
 
     return useCallback(async ({ projectId, modelId, sessionId }: SessionArgs) => {
         const resp = await fetch(
-            `${baseUrl}/projects/${projectId}/models/${modelId}/end-session`,
+            `${apiUrl}/projects/${projectId}/models/${modelId}/end-session`,
             {
                 method: "POST",
                 headers: {
@@ -154,7 +153,7 @@ export const useApiQuery = <T>({
         queryKey,
         queryFn: async () => {
             try {
-                const response = await fetch(`${baseUrl}/${queryUrl}`, {headers});
+                const response = await fetch(`${apiUrl}/${queryUrl}`, {headers});
                 if (!response.ok) throw new Error(`Error ${response.status}: request failed`);
 
                 const jsonData = await response.json();
@@ -197,7 +196,7 @@ export const useApiMutation = <InputType, ResponseType>({
             if(!!sessionId) headers['X-Client-Session-Id'] = sessionId;
 
             try {
-                response = await fetch(`${baseUrl}/${mutationUrl}`, {
+                response = await fetch(`${apiUrl}/${mutationUrl}`, {
                     method,
                     headers: requestHeaders,
                     body: JSON.stringify(variables),
