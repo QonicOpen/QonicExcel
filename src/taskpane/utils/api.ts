@@ -193,7 +193,7 @@ export const useApiMutation = <InputType, ResponseType>({
                 'Content-Type': 'application/json',
                 'X-Client-Type': 'Excel'
             }
-            if(!!sessionId) headers['X-Client-Session-Id'] = sessionId;
+            if(!!sessionId) requestHeaders['X-Client-Session-Id'] = sessionId;
 
             try {
                 response = await fetch(`${apiUrl}/${mutationUrl}`, {
