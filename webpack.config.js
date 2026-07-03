@@ -32,7 +32,6 @@ module.exports = async (env, options) => {
   envKeys["process.env.QONIC_API_URL"] = JSON.stringify(envConfig.QONIC_API_URL ?? "https://api.qonic.com/v1");
   envKeys["process.env.API_ENV"] = JSON.stringify(envConfig.API_ENV ?? "release");
   envKeys["process.env.QONIC_CLIENT_ID"] = JSON.stringify(envConfig.QONIC_CLIENT_ID ?? "");
-  envKeys["process.env.QONIC_CLIENT_SECRET"] = JSON.stringify(envConfig.QONIC_CLIENT_SECRET ?? "");
 
   const config = {
     devtool: "source-map",

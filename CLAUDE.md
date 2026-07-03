@@ -56,7 +56,7 @@ webpack.config.js      # Webpack configuration
 - The add-in uses OAuth PKCE flow via Auth0 — credentials are configured via `.env` files
 - `manifest.xml` defines the add-in's capabilities and must be valid — run `npm run validate` to check
 - The dev server runs on HTTPS (required by Office Add-ins) at `https://localhost:3000`
-- Environment variables: `QONIC_CLIENT_ID`, `QONIC_CLIENT_SECRET` (from `.env`)
+- Environment variables: optional `QONIC_CLIENT_ID` override (from `.env`)
 - Multiple env configs: `.env` (default), `.env.develop`, `.env.rc`, `.env.example`
 
 ## How This Repo Interfaces With Others

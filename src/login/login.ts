@@ -1,10 +1,11 @@
 const apiUrl = process.env.QONIC_API_URL
-const QONIC_CLIENT_ID = process.env.QONIC_CLIENT_ID!;
-const QONIC_CLIENT_SECRET = process.env.QONIC_CLIENT_SECRET!;
+const QONIC_CLIENT_ID = process.env.QONIC_CLIENT_ID ?? "";
 const QONIC_SCOPES = "projects:read models:read models:write";
+const APPLICATION_KEY = "qonic_excel";
 
 const REDIRECT_URI = `${window.location.origin}/login.html`
 const PKCE_STORAGE_KEY = process.env.API_ENV ? process.env.API_ENV + "_qonic_pkce" : "qonic_pkce";
+let clientIdPromise: Promise<string> | undefined;
 
 function randomString(length: number, chars: string): string {
     let result = "";
@@ -41,6 +42,29 @@ async function makeCodeChallenge(verifier: string): Promise<string> {
     return base64UrlEncode(digest);
 }
 
+async function getClientId(): Promise<string> {
+    if (QONIC_CLIENT_ID) {
+        return QONIC_CLIENT_ID;
+    }
+
+    clientIdPromise ??= fetch(`${apiUrl}/public-api-applications/config`)
+        .then(async (resp) => {
+            if (!resp.ok) {
+                throw new Error(`public_app_config_failed:${resp.status}`);
+            }
+
+            const applications = await resp.json();
+            const clientId = applications?.[APPLICATION_KEY]?.clientId;
+            if (!clientId) {
+                throw new Error(`missing_public_app_client_id:${APPLICATION_KEY}`);
+            }
+
+            return clientId;
+        });
+
+    return clientIdPromise;
+}
+
 function makeState(length = 24): string {
     const alphabet =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -48,6 +72,7 @@ function makeState(length = 24): string {
 }
 
 async function startAuthorize(): Promise<void> {
+    const clientId = await getClientId();
     const codeVerifier = makeCodeVerifier(64);
     const codeChallenge = await makeCodeChallenge(codeVerifier);
     const state = makeState(24);
@@ -56,7 +81,7 @@ async function startAuthorize(): Promise<void> {
     sessionStorage.setItem(`${PKCE_STORAGE_KEY}_state`, state);
 
     const params = new URLSearchParams({
-        client_id: QONIC_CLIENT_ID,
+        client_id: clientId,
         redirect_uri: REDIRECT_URI,
         scope: QONIC_SCOPES,
         state,
@@ -70,6 +95,7 @@ async function startAuthorize(): Promise<void> {
 }
 
 async function handleCallback(): Promise<void> {
+    const clientId = await getClientId();
     const qs = new URLSearchParams(window.location.search);
     const code = qs.get("code");
     const returnedState = qs.get("state") ?? "";
@@ -114,8 +140,7 @@ async function handleCallback(): Promise<void> {
         redirect_uri: REDIRECT_URI,
         code_verifier: codeVerifier,
         grant_type: "authorization_code",
-        client_id: QONIC_CLIENT_ID,
-        client_secret: QONIC_CLIENT_SECRET,
+        client_id: clientId,
     })
 
     const form = new URLSearchParams();
@@ -123,8 +148,7 @@ async function handleCallback(): Promise<void> {
     form.append("redirect_uri", REDIRECT_URI);
     form.append("code_verifier", codeVerifier);
     form.append("grant_type", "authorization_code");
-    form.append("client_id", QONIC_CLIENT_ID);
-    form.append("client_secret", QONIC_CLIENT_SECRET); // ⚠️ see note below
+    form.append("client_id", clientId);
 
     const resp = await fetch(`${apiUrl}/auth/token`, {
         method: "POST",
