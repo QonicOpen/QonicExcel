@@ -54,7 +54,7 @@ async function getClientId(): Promise<string> {
             }
 
             const applications = await resp.json();
-            const clientId = applications?.[APPLICATION_KEY]?.clientId;
+            const clientId = applications?.[APPLICATION_KEY];
             if (!clientId) {
                 throw new Error(`missing_public_app_client_id:${APPLICATION_KEY}`);
             }
