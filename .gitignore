@@ -1,6 +1,3 @@
-# Keep the lockfile tracked for reproducible installs (overrides a global ignore)
-!package-lock.json
-
 # Logs
 logs
 *.log
