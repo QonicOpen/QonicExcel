@@ -1,6 +1,7 @@
 const apiUrl = process.env.QONIC_API_URL
 const QONIC_CLIENT_ID = process.env.QONIC_CLIENT_ID!;
-const QONIC_CLIENT_SECRET = process.env.QONIC_CLIENT_SECRET!;
+// Optional: leave blank for public clients registered without a client secret
+const QONIC_CLIENT_SECRET = process.env.QONIC_CLIENT_SECRET || "";
 const QONIC_SCOPES = "projects:read models:read models:write";
 
 const REDIRECT_URI = `${window.location.origin}/login.html`
@@ -109,22 +110,16 @@ async function handleCallback(): Promise<void> {
         return;
     }
 
-    console.log({
-        code,
-        redirect_uri: REDIRECT_URI,
-        code_verifier: codeVerifier,
-        grant_type: "authorization_code",
-        client_id: QONIC_CLIENT_ID,
-        client_secret: QONIC_CLIENT_SECRET,
-    })
-
     const form = new URLSearchParams();
     form.append("code", code);
     form.append("redirect_uri", REDIRECT_URI);
     form.append("code_verifier", codeVerifier);
     form.append("grant_type", "authorization_code");
     form.append("client_id", QONIC_CLIENT_ID);
-    form.append("client_secret", QONIC_CLIENT_SECRET); // ⚠️ see note below
+    // Public clients have no secret; omit when not configured.
+    if (QONIC_CLIENT_SECRET) {
+        form.append("client_secret", QONIC_CLIENT_SECRET);
+    }
 
     const resp = await fetch(`${apiUrl}/auth/token`, {
         method: "POST",
