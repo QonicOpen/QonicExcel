@@ -18,11 +18,9 @@ To install and set up the Qonic Excel add-in, follow these steps:
 ### 1. Prerequisites
 
 -	[Node.js](https://nodejs.org/)
--	A Qonic Application in the [Developer Portal](https://developer.qonic.com)
+-	A Qonic account
 
-You’ll need:
-- Client ID and Client Secret
-- Whitelisted Redirect URI: https://localhost:3000/login.html
+By default, this add-in uses Qonic's pre-registered public OAuth client. To test your own app registration, set `QONIC_CLIENT_ID` to your application's client id and whitelist `https://localhost:3000/login.html`.
 
 ### 2.  Copy the environment template
 ```bash
@@ -31,9 +29,8 @@ cp .env.example .env
 
 ### 3. Configure .env
 ```bash
-# From your Developer Portal application
+# Optional: override Qonic's default Excel client
 QONIC_CLIENT_ID=YOUR_CLIENT_ID
-QONIC_CLIENT_SECRET=YOUR_CLIENT_SECRET
 ```
 
 ### 3. Install Dependencies:
