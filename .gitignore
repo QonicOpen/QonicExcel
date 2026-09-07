@@ -135,3 +135,6 @@ dist
 
 .env**
 !.env.example
+
+# Per-worktree scratch file
+TASK.md

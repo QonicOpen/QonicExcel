@@ -135,14 +135,6 @@ async function handleCallback(): Promise<void> {
         return;
     }
 
-    console.log({
-        code,
-        redirect_uri: REDIRECT_URI,
-        code_verifier: codeVerifier,
-        grant_type: "authorization_code",
-        client_id: clientId,
-    })
-
     const form = new URLSearchParams();
     form.append("code", code);
     form.append("redirect_uri", REDIRECT_URI);
