@@ -22,7 +22,7 @@ export async function fillModelData(data: ModelData): Promise<void>
         const properties = Array.from(new Set(data.records.flatMap(item => {
             return Object.entries(item).flatMap((kvp) => {
                 const [key, value] = kvp;
-                if (typeof value === 'object' && key !== "Code") return Object.keys(value).map(subKey => `${key}: ${subKey}`)
+                if (value !== null && typeof value === 'object' && key !== "Code") return Object.keys(value).map(subKey => `${key}: ${subKey}`)
                 return key;
             });
         })))
@@ -39,7 +39,7 @@ export async function fillModelData(data: ModelData): Promise<void>
         const rows = data.records.map(item => properties.map(property => {
             const [key, subKey] = property.split(': ');
             if (key === "Code") return JSON.stringify(item[key]);
-            if (subKey) return item[key][subKey];
+            if (subKey) return item[key]?.[subKey];
             return item[key];
         }));
 
