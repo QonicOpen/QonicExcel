@@ -89,8 +89,6 @@ async function startAuthorize(): Promise<void> {
         code_challenge_method: "S256",
     });
 
-    console.log(params)
-
     window.location.href = `${apiUrl}/auth/authorize?${params.toString()}`;
 }
 
@@ -134,14 +132,6 @@ async function handleCallback(): Promise<void> {
         );
         return;
     }
-
-    console.log({
-        code,
-        redirect_uri: REDIRECT_URI,
-        code_verifier: codeVerifier,
-        grant_type: "authorization_code",
-        client_id: clientId,
-    })
 
     const form = new URLSearchParams();
     form.append("code", code);
