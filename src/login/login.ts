@@ -89,8 +89,6 @@ async function startAuthorize(): Promise<void> {
         code_challenge_method: "S256",
     });
 
-    console.log(params)
-
     window.location.href = `${apiUrl}/auth/authorize?${params.toString()}`;
 }
 
