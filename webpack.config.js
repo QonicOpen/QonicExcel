@@ -9,9 +9,18 @@ const {argv} = require("process");
 const dotenv = require("dotenv");
 
 const urlDev = "https://localhost:3000/";
-const urlProd = "https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
 
-
+// The login dialog and OAuth redirect are built from window.location.origin, so the add-in must be served from the root of an HTTPS origin.
+function getProductionUrl(addinUrl) {
+  if (!addinUrl) {
+    throw new Error("Set ADDIN_URL in .env (e.g. ADDIN_URL=https://excel.example.com/) to the address where you host the add-in.");
+  }
+  const url = new URL(addinUrl);
+  if (url.protocol !== "https:" || url.pathname !== "/" || url.search || url.hash) {
+    throw new Error(`ADDIN_URL must be the root of an HTTPS origin, like https://excel.example.com/ (got ${addinUrl}).`);
+  }
+  return url.origin + "/";
+}
 
 async function getHttpsOptions() {
   const httpsOptions = await devCerts.getHttpsServerOptions();
@@ -32,6 +41,8 @@ module.exports = async (env, options) => {
   envKeys["process.env.QONIC_API_URL"] = JSON.stringify(envConfig.QONIC_API_URL ?? "https://api.qonic.com/v1");
   envKeys["process.env.API_ENV"] = JSON.stringify(envConfig.API_ENV ?? "release");
   envKeys["process.env.QONIC_CLIENT_ID"] = JSON.stringify(envConfig.QONIC_CLIENT_ID ?? "");
+
+  const urlProd = dev ? urlDev : getProductionUrl(process.env.ADDIN_URL);
 
   const config = {
     devtool: "source-map",
